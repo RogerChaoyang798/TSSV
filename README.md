@@ -26,7 +26,11 @@ sudo apt-get install -y nodejs
 node -v #v20.12.0
 npm -v  #10.5.0
 ```
-
+For Centos Node.js installation:
+```bash
+curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+sudo yum install -y nodejs
+```
 #### Run Procedure
 ```bash
 git clone https://github.com/TypeScriptSystemVerilog/TSSV.git
