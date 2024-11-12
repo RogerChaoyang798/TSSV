@@ -1,0 +1,74 @@
+[
+  {
+    "name": "",
+    "dataWidth": 64,
+    "addressWidth": 15,
+    "depth": 32768,
+    "port": "1p11",
+    "sw": 1
+  },
+  {
+    "name": "",
+    "dataWidth": 32,
+    "addressWidth": 15,
+    "depth": 32768,
+    "port": "1p11",
+    "sw": 1
+  },
+  {
+    "name": "",
+    "dataWidth": 16,
+    "addressWidth": 10,
+    "depth": 1024,
+    "port": "1p11",
+    "sw": 1
+  },
+  {
+    "name": "",
+    "dataWidth": 140,
+    "addressWidth": 5,
+    "depth": 32,
+    "port": "1p11",
+    "sw": 1
+  },
+  {
+    "name": "",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 64,
+    "addressWidth": 11,
+    "depth": 2048,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 32,
+    "addressWidth": 10,
+    "depth": 1024,
+    "port": "1p11",
+    "sw": 1
+  },
+  {
+    "name": "",
+    "dataWidth": 39,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 27,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 0
+  }
+]

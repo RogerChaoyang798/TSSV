@@ -1,0 +1,42 @@
+[
+  {
+    "name": "",
+    "dataWidth": 32,
+    "addressWidth": 10,
+    "depth": 1024,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 32,
+    "addressWidth": 11,
+    "depth": 2048,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 32,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 32,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "2p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 32,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "2p12",
+    "sw": 0
+  }
+]

@@ -1,0 +1,466 @@
+[
+  {
+    "name": "u_core0_w0_shw_tram_bus",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 22
+  },
+  {
+    "name": "u_core0_w1_shw_tram_bus",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 22
+  },
+  {
+    "name": "u_core1_w0_shw_tram_bus",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 22
+  },
+  {
+    "name": "u_core1_w1_shw_tram_bus",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 22
+  },
+  {
+    "name": "u_core2_w0_shw_tram_bus",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 22
+  },
+  {
+    "name": "u_core2_w1_shw_tram_bus",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 22
+  },
+  {
+    "name": "u_core3_w0_shw_tram_bus",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 22
+  },
+  {
+    "name": "u_core3_w1_shw_tram_bus",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 22
+  },
+  {
+    "name": "u_l2c_w0_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w1_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w2_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w3_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w4_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w5_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w6_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w7_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w8_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w9_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w10_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w11_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w12_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w13_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w14_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w15_b0_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_b0_aram",
+    "dataWidth": 15,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 15
+  },
+  {
+    "name": "u_l2c_w0_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w1_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w2_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w3_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w4_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w5_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w6_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w7_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w8_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w9_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w10_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w11_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w12_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w13_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w14_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_w15_b1_tram",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 20
+  },
+  {
+    "name": "u_l2c_b1_aram",
+    "dataWidth": 15,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 15
+  },
+  {
+    "name": "u_l2c_b0_ck0_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b0_ck1_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b0_ck2_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b0_ck3_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b0_ck4_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b0_ck5_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b0_ck6_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b0_ck7_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b1_ck0_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b1_ck1_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b1_ck2_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b1_ck3_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b1_ck4_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b1_ck5_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b1_ck6_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  },
+  {
+    "name": "u_l2c_b1_ck7_dram",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 8
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "name": "",
+    "dataWidth": 22,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 20,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 15,
+    "addressWidth": 8,
+    "depth": 256,
+    "port": "1p11",
+    "sw": 0
+  },
+  {
+    "name": "",
+    "dataWidth": 64,
+    "addressWidth": 12,
+    "depth": 4096,
+    "port": "1p11",
+    "sw": 1
+  }
+]

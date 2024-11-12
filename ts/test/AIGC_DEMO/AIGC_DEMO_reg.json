@@ -1,0 +1,23 @@
+{
+    "CFG0": {
+    "type": "WO",
+    "description": "config register",
+    "fields": {
+      "m2_clear": {
+        "bitRange": [24, 24],
+        "reset": "0x0"
+      },
+      "m1_clear": {
+        "bitRange": [7, 4],
+        "reset": "0x0"
+      },
+      "m0_clear": {
+        "bitRange": [3, 0],
+        "reset": "0x0"
+      }
+    }
+  }
+
+}
+
+    

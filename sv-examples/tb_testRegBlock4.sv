@@ -94,9 +94,9 @@ module testRegBlock
    input logic  clk,
    input logic  rst_b,
    output logic [31:0] REG0,
-   output logic signed [15:0] REG1,
-   output logic [15:0] REG2_field0,
-   output logic [15:0] REG2_field1,
+   output logic [15:0] REG1,
+   output logic  REG2_field0,
+   output logic  REG2_field1,
    output logic [31:0] MEM0_rdata,
    output logic  MEM0_re,
    output logic  MEM0_we,
@@ -179,7 +179,7 @@ always @(regs.ADDR or regs.RE)
    always_ff @( posedge clk  or negedge rst_b )
      if(!rst_b)
         begin
-           REG0 <= 'd0;
+           REG0 <= 'd0x0;
         end
       else if(REG0_WE)
         begin
@@ -194,8 +194,8 @@ always @(regs.ADDR or regs.RE)
         end
       else if(REG2_WE && REG2_wstrb)
         begin
-           REG2_field0 <= regs.DATA_WR[15:0];
-           REG2_field1 <= regs.DATA_WR[31:16];
+           REG2_field0 <= regs.DATA_WR[0:15];
+           REG2_field1 <= regs.DATA_WR[16:31];
         end
 
    always_ff @( posedge clk  or negedge rst_b )
@@ -229,7 +229,7 @@ always @(regs.ADDR or regs.RE)
    always_ff @( posedge clk  or negedge rst_b )
      if(!rst_b)
         begin
-           REG0 <= 'd0;
+           REG0 <= 'd0x0;
         end
       else if(REG0_WE)
         begin
@@ -244,8 +244,8 @@ always @(regs.ADDR or regs.RE)
         end
       else if(REG2_WE && REG2_wstrb)
         begin
-           REG2_field0 <= regs.DATA_WR[15:0];
-           REG2_field1 <= regs.DATA_WR[31:16];
+           REG2_field0 <= regs.DATA_WR[0:15];
+           REG2_field1 <= regs.DATA_WR[16:31];
         end
 
    always_ff @( posedge clk  or negedge rst_b )
@@ -279,7 +279,7 @@ always @(regs.ADDR or regs.RE)
    always_ff @( posedge clk  or negedge rst_b )
      if(!rst_b)
         begin
-           REG0 <= 'd0;
+           REG0 <= 'd0x0;
         end
       else if(REG0_WE)
         begin
@@ -294,8 +294,8 @@ always @(regs.ADDR or regs.RE)
         end
       else if(REG2_WE && REG2_wstrb)
         begin
-           REG2_field0 <= regs.DATA_WR[15:0];
-           REG2_field1 <= regs.DATA_WR[31:16];
+           REG2_field0 <= regs.DATA_WR[0:15];
+           REG2_field1 <= regs.DATA_WR[16:31];
         end
 
    always_ff @( posedge clk  or negedge rst_b )
@@ -329,7 +329,7 @@ always @(regs.ADDR or regs.RE)
    always_ff @( posedge clk  or negedge rst_b )
      if(!rst_b)
         begin
-           REG0 <= 'd0;
+           REG0 <= 'd0x0;
         end
       else if(REG0_WE)
         begin
@@ -344,8 +344,8 @@ always @(regs.ADDR or regs.RE)
         end
       else if(REG2_WE && REG2_wstrb)
         begin
-           REG2_field0 <= regs.DATA_WR[15:0];
-           REG2_field1 <= regs.DATA_WR[31:16];
+           REG2_field0 <= regs.DATA_WR[0:15];
+           REG2_field1 <= regs.DATA_WR[16:31];
         end
 
    always_ff @( posedge clk  or negedge rst_b )
@@ -396,9 +396,9 @@ module tb_testRegBlock4
    logic [31:0] rdata;
    logic  ready;
    logic [31:0] REG0;
-   logic signed [15:0] REG1;
-   logic [15:0] REG2_field0;
-   logic [15:0] REG2_field1;
+   logic [15:0] REG1;
+   logic  REG2_field0;
+   logic  REG2_field1;
    logic [31:0] MEM0_rdata;
    logic  MEM0_re;
    logic  MEM0_we;
