@@ -1,5 +1,6 @@
 import { Module, Expr } from 'tssv/lib/core/TSSV';
 import { Memory } from 'tssv/lib/interfaces/Memory';
+import { APB4 } from 'tssv/lib/interfaces/AMBA/AMBA4/APB4/r0p0_0/APB4';
 export class RegAddr {
     constructor(start, wordSize) {
         this.addr = start || 0n;
@@ -60,19 +61,31 @@ export class RegisterBlock extends Module {
             clk: { direction: 'input', isClock: 'posedge' },
             rst_b: { direction: 'input', isReset: 'lowasync' }
         };
-        if (!(busInterface instanceof Memory)) {
+        // if (!(busInterface instanceof Memory)) {
+        //   throw Error('Unsupported interface')
+        // }
+        if (!((busInterface instanceof Memory) || (busInterface instanceof APB4))) {
             throw Error('Unsupported interface');
         }
-        this.addInterface('regs', new Memory({
-            DATA_WIDTH: regDefs.wordSize || 32,
-            ADDR_WIDTH: params.busAddressWidth
-        }, 'inward'));
+        if (busInterface instanceof Memory) {
+            this.addInterface('regs', new Memory({
+                DATA_WIDTH: regDefs.wordSize || 32,
+                ADDR_WIDTH: params.busAddressWidth
+            }, 'inward'));
+        }
+        else if (busInterface instanceof APB4) {
+            this.addInterface('p', new APB4({
+                DATA_WIDTH: regDefs.wordSize || 32,
+                ADDR_WIDTH: params.busAddressWidth
+            }, 'inward'));
+        }
         // Create signals and logic for registers
         for (const reg in this.regDefs.addrMap) {
             const regName = reg;
             const registers = this.regDefs.registers;
             const baseAddr = this.regDefs.addrMap[regName];
             const matchExpr = this.addSignal(`${regName}_matchExpr`, { width: 1 });
+            // const decExpr = this.addSignal(`dec_${regName}`, { width: 1 })
             let thisReg = {
                 type: 'RW',
                 width: regDefs.wordSize
@@ -82,6 +95,7 @@ export class RegisterBlock extends Module {
             }
             if (thisReg.type === 'RW') {
                 const wstrbWidth = (params.busAddressWidth || 8) / 8;
+                // const wstrbWidth = (regDefs.wordSize || 8) / 8
                 const wstrb = this.addSignal(`${regName}_wstrb`, { width: wstrbWidth });
                 // Use original address for logic
                 this.addAssign({ in: new Expr(`regs.ADDR == ${baseAddr}`), out: matchExpr });

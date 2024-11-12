@@ -1,0 +1,30 @@
+function readVerilogFile(filePath: string): string {
+  // Read the content of the current file
+  let verilogCode = fs.readFileSync(filePath, 'utf-8');
+
+  // Regular expression to match import statements like import TPartCommon::*
+  const importRegex = /import\s+(\w+)::\*\s*;/g;
+  let match;
+  
+  // Get the directory path of the current file
+  const dirPath = path.dirname(filePath);
+
+  // Find and read all the matched imported modules
+  while ((match = importRegex.exec(verilogCode)) !== null) {
+    const moduleName = match[1];  // Extract the module name, e.g., TPartCommon
+    
+    // Construct the file path of the module
+    const moduleFilePath = path.join(dirPath, `${moduleName}.sv`);
+
+    // Check if the module file exists
+    if (fs.existsSync(moduleFilePath)) {
+      const moduleCode = fs.readFileSync(moduleFilePath, 'utf-8');
+      // Append the module code to the current Verilog file content
+      verilogCode += '\n' + moduleCode;
+    } else {
+      console.warn(`Module file ${moduleName}.sv not found in ${dirPath}`);
+    }
+  }
+
+  return verilogCode;
+}

@@ -1,0 +1,2 @@
+node ./out/src/tools/convert/reg_convert.js
+node ./out/test/testRegisters.js

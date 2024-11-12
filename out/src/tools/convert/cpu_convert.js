@@ -1,56 +1,114 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import { Module, Expr } from 'tssv/lib/core/TSSV';
 import { SRAM } from 'tssv/lib/modules/SRAM';
+const predefinedConstants = {};
 function readVerilogFile(filePath) {
-    return fs.readFileSync(filePath, 'utf-8');
+    // Read the content of the current file
+    let verilogCode = fs.readFileSync(filePath, 'utf-8');
+    // Regular expression to match import statements like import TPartCommon::*
+    const importRegex = /import\s+(\w+)::\*\s*;/g;
+    let match;
+    const dirPath = path.dirname(filePath);
+    // Find and read all the matched imported modules
+    while ((match = importRegex.exec(verilogCode)) !== null) {
+        const moduleName = match[1];
+        const moduleFilePath = path.join(dirPath, `${moduleName}.sv`);
+        if (fs.existsSync(moduleFilePath)) {
+            const moduleCode = fs.readFileSync(moduleFilePath, 'utf-8');
+            // Append the module code to the current Verilog file content
+            verilogCode += '\n' + moduleCode;
+        }
+        else {
+            console.warn(`Module file ${moduleName}.sv not found in ${dirPath}`);
+        }
+    }
+    return verilogCode;
+}
+function generatePredefinedConstants(verilogCode) {
+    const regex = /(parameter|localparam)\s+(\w+)\s*=\s*(\d+)\s*[,|;)]/g;
+    let match;
+    while ((match = regex.exec(verilogCode)) !== null) {
+        const [_, paramType, paramName, paramValue] = match;
+        predefinedConstants[paramName] = parseInt(paramValue, 10);
+    }
+    console.log(predefinedConstants);
+}
+function evaluateExpression(expr) {
+    try {
+        for (const [key, value] of Object.entries(predefinedConstants)) {
+            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            expr = expr.replace(regex, value.toString());
+        }
+        const clog2Regex = /\$clog2\((\d+)/g;
+        expr = expr.replace(clog2Regex, (match, p1) => {
+            const value = parseInt(p1, 10);
+            if (value <= 0)
+                return '0';
+            return Math.ceil(Math.log2(value)).toString();
+        });
+        return eval(expr);
+    }
+    catch (error) {
+        console.error(`Unable to evaluate expression: ${expr}`);
+        return NaN;
+    }
+}
+function processParameter(paramValue) {
+    if (paramValue.startsWith('$bits')) {
+        return NaN; // $bits function
+    }
+    if (!isNaN(Number(paramValue.trim()))) {
+        return parseInt(paramValue.trim(), 10);
+    }
+    return evaluateExpression(paramValue);
+}
+function isDuplicateModule(existingModules, newModule) {
+    return existingModules.some(module => module.dataWidth === newModule.dataWidth &&
+        module.addressWidth === newModule.addressWidth &&
+        module.depth === newModule.depth &&
+        module.port === newModule.port &&
+        module.sw === newModule.sw);
 }
 function extractSramModules(verilogCode) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const rhcRegex = /rhc./;
+    const rhcRegex = /rhc.*pram/;
     const uxRegex = /ux900./;
-    // console.log(`is this true: ${sramRegex.test(verilogCode)}`)
     if (rhcRegex.test(verilogCode)) {
         console.log('rhc mode');
-        const instantiationRegex = /(\w+)\s*#\(\s*([\s\S]+?)\s*\)\s+(\w+)\s*\(\s*([\s\S]+?)\s*\);/g;
+        const instantiationRegex = /(rhc\w*ram\w*)\s*#\(\s*([\s\S]+?)\s*\)\s*(\w+)\s*\(\s*([\s\S]+?)\s*\);/g;
         const parameterRegex = /\.([A-Z_]+)\((\d+)\)/gi;
         const sramModules = [];
         let instantiationMatch;
         while ((instantiationMatch = instantiationRegex.exec(verilogCode)) !== null) {
-            const [, moduleName, parameters, instanceName] = instantiationMatch; // removed instanceName
-            console.log(moduleName);
+            const [, moduleName, parameters, instanceName] = instantiationMatch;
             let port = 'UNKNOWN';
             if (moduleName.startsWith('rhc_spram')) {
                 port = '1p11';
             }
             else if (moduleName.startsWith('rhc_tpram_s2x')) {
                 port = '2p12';
-                console.log(moduleName);
             }
             else if (moduleName.startsWith('rhc_tpram')) {
                 port = '2p11';
-                console.log(moduleName);
             }
             const params = {};
             let paramMatch;
+            const parameterRegex = /\.(\w+)\s*\(\s*([\s\S]+?)\s*\)/g;
             while ((paramMatch = parameterRegex.exec(parameters)) !== null) {
                 const [, paramName, paramValue] = paramMatch;
-                params[paramName] = parseInt(paramValue, 10);
+                const finalValue = processParameter(paramValue);
+                params[paramName] = finalValue;
             }
+            console.log(params);
             const sramModule = {
                 name: '',
                 dataWidth: params.DATA_W || 0,
                 addressWidth: params.ADDR_W || 0,
                 depth: params.DEPTH || 0,
-                port: port
-                // Add other fields as needed, with defaults or parsed values.
+                port: port,
+                sw: params.WREN_W === 1 ? 0 : 1
             };
-            const isDuplicate = sramModules.some(module => module.name === sramModule.name &&
-                module.dataWidth === sramModule.dataWidth &&
-                module.addressWidth === sramModule.addressWidth &&
-                module.depth === sramModule.depth &&
-                module.port === sramModule.port &&
-                module.sw === sramModule.sw);
-            if (!isDuplicate) {
+            if (!isDuplicateModule(sramModules, sramModule)) {
                 sramModules.push(sramModule);
             }
         }
@@ -72,13 +130,7 @@ function extractSramModules(verilogCode) {
                 sw: parseInt(mw, 10) === 1 ? 0 : 1
                 //sw: parseInt(dw, 10) / parseInt(mw, 10)
             };
-            const isDuplicate = sramModules.some(module => module.name === sramModule.name &&
-                module.dataWidth === sramModule.dataWidth &&
-                module.addressWidth === sramModule.addressWidth &&
-                module.depth === sramModule.depth &&
-                module.port === sramModule.port &&
-                module.sw === sramModule.sw);
-            if (!isDuplicate) {
+            if (!isDuplicateModule(sramModules, sramModule)) {
                 sramModules.push(sramModule);
             }
         }
@@ -130,13 +182,7 @@ function extractSramModules(verilogCode) {
                 sw: singleWrite
                 // code: moduleDeclaration.trim()
             };
-            const isDuplicate = sramModules.some(module => module.name === sramModule.name &&
-                module.dataWidth === sramModule.dataWidth &&
-                module.addressWidth === sramModule.addressWidth &&
-                module.depth === sramModule.depth &&
-                module.port === sramModule.port &&
-                module.sw === sramModule.sw);
-            if (!isDuplicate) {
+            if (!isDuplicateModule(sramModules, sramModule)) {
                 sramModules.push(sramModule);
             }
         }
@@ -241,14 +287,13 @@ function jsonToCsv(jsonData) {
             sram.bistInterface !== undefined ? sram.bistInterface.toString : 'FALSE',
             sram.dualRail !== undefined ? sram.dualRail.toString : 'FALSE',
             sram.powerGating !== undefined ? sram.powerGating.toString : 'FALSE',
-            sram.peripheryVt || '',
+            sram.peripheryVt !== undefined ? sram.peripheryVt.toString : 'FALSE',
             sram.readAssist !== undefined ? sram.readAssist.toString : 'FALSE',
             sram.writeAssist !== undefined ? sram.writeAssist.toString : 'FALSE',
             sram.pvtEnable !== undefined ? sram.pvtEnable.toString : '{ 19 20 22 }'
         ];
         csvContent += row.join(',') + '\n';
     });
-    // console.log(csvContent)
     return csvContent;
 }
 function splitCsvContent(csvContent, outputPath) {
@@ -275,11 +320,8 @@ function main() {
         console.error(`File not found: ${filePath}`);
         process.exit(1);
     }
-    // if (!fs.existsSync(outputPath)) {
-    //   console.error(`Output path not found: ${outputPath}`)
-    //   process.exit(1)
-    // }
     const verilogCode = readVerilogFile(filePath);
+    generatePredefinedConstants(verilogCode);
     const [type, sramModules] = extractSramModules(verilogCode);
     const sramModulesJson = JSON.stringify(sramModules, null, 2);
     if (type === 'pc') {
