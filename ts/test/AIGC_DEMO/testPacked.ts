@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 
-// const registers = JSON.parse(fs.readFileSync('AIGC_DEMO_reg.json', 'utf8'))
+const registers = JSON.parse(fs.readFileSync('sv-examples/reg_convert/AIGC_DEMO_reg.json', 'utf8'))
+const WORD_SIZE = 32
 
 const svFile = fs.createWriteStream('sv-examples/AIGC_DEMO_reg_pkg.sv')
 svFile.write('package AIGC_DEMO_reg_pkg;\n\n')
@@ -11,21 +12,22 @@ svFile.write('// ===============================================================
 interface Field {
   bitRange: [number, number]
   reset?: bigint
+  fieldDescription: string
 }
 
 interface Register {
   type: string
   description: string
+  repeat: number
   fields: Record<string, Field>
 }
-
 function generateStruct (registerName: string, register: Register): string {
   const fields = register.fields
   let result = 'typedef struct packed {\n'
 
   const sortedFields = Object.entries(fields).sort((a, b) => b[1].bitRange[0] - a[1].bitRange[0])
   let resCount = -1
-  let lastBit = 32
+  let lastBit = WORD_SIZE
 
   sortedFields.forEach(([name, field], index) => {
     const [msb, lsb] = field.bitRange
@@ -35,7 +37,7 @@ function generateStruct (registerName: string, register: Register): string {
     lastBit = lsb
   })
 
-  lastBit = 32
+  lastBit = WORD_SIZE
 
   sortedFields.forEach(([name, field], index) => {
     const [msb, lsb] = field.bitRange
