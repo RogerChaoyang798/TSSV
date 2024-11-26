@@ -181,7 +181,7 @@ try {
 
   const adjustedVerilog = modifySignalTypes(rawVerilog)
 
-  fs.writeFileSync('sv-examples/tb_intAIGCDEMOreg.sv', adjustedVerilog)
+  fs.writeFileSync('sv-examples/reg_convert/tb_intAIGCDEMOreg.sv', adjustedVerilog)
 } catch (err) {
   console.error(err)
 }
