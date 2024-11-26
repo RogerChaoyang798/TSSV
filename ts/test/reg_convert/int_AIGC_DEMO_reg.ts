@@ -1,6 +1,5 @@
 import { type RegisterBlockDef, RegisterBlock } from 'tssv/lib/core/Registers'
 import { Module, serialize, deserialize } from 'tssv/lib/core/TSSV'
-// import { APB } from 'tssv/lib/interfaces/AMBA/AMBA3/APB/r2p0_0/APB'
 import { APB4 } from 'tssv/lib/interfaces/AMBA/AMBA4/APB4/r0p0_0/APB4'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -159,38 +158,29 @@ tb_testRegBlock.addSubmodule(
 
 try {
   const modifySignalTypes = (content: string): string => {
-    // 动态生成正则表达式
     const dynamicPattern = new RegExp(
       `^logic\s+\[${myRegs.wordSize - 1}:0\]\s+(reg_[A-Z0-9][A-Za-z0-9_]*)\s*`
     )
 
     return content
-      .split('\n') // 按行分割
+      .split('\n')
       .map(line => {
-        // 去除行首缩进
         const trimmedLine = line.trim()
-
-        // 检查是否匹配动态正则表达式
         const match = trimmedLine.match(dynamicPattern)
         if (match) {
-          const signalName = match[1] // 提取信号名
-          // 替换 logic [31:0] 为信号名_t
+          const signalName = match[1]
           return trimmedLine.replace(dynamicPattern, `${signalName}_t ${signalName};`)
         }
 
-        // 如果不匹配，则直接返回去掉缩进的行
         return trimmedLine
       })
-      .join('\n') // 重新组合为字符串
+      .join('\n')
   }
 
-  // 调用 writeSystemVerilog 生成原始内容
-  let rawVerilog = tb_testRegBlock.writeSystemVerilog()
+  const rawVerilog = tb_testRegBlock.writeSystemVerilog()
 
-  // 对生成的内容处理信号类型和去缩进
-  let adjustedVerilog = modifySignalTypes(rawVerilog)
+  const adjustedVerilog = modifySignalTypes(rawVerilog)
 
-  // 写入文件
   fs.writeFileSync('sv-examples/tb_intAIGCDEMOreg.sv', adjustedVerilog)
 } catch (err) {
   console.error(err)

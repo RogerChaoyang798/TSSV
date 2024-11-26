@@ -2,7 +2,7 @@ import * as fs from 'fs'
 
 const WORD_SIZE = 32
 
-const svFile = fs.createWriteStream('sv-examples/AIGC_DEMO/AIGC_DEMO_reg_pkg.sv')
+const svFile = fs.createWriteStream('sv-examples/reg_convert/AIGC_DEMO_reg_pkg.sv')
 svFile.write('package AIGC_DEMO_reg_pkg;\n\n')
 svFile.write('// =============================================================================\n')
 svFile.write('// Register bit field definition\n')
@@ -22,15 +22,15 @@ interface Register {
   reset: string
 }
 
-interface RegisterWoFields {
+interface RegWoFdsUnfoldRep {
   type: string
   description: string
-  repeat: number
+  // repeat: number
   reset: string
 }
 
-const AIGC_DEMO_regs = JSON.parse(fs.readFileSync('sv-examples/reg_convert/AIGC_DEMO_reg.json', 'utf8')) as Record<string, Register>
-const AIGC_DEMO_regs_wofields = {} as Record<string, Register> as Record<string, RegisterWoFields>
+const AIGC_DEMO_regs = JSON.parse(fs.readFileSync('sv-examples/reg_convert/AIGC_DEMO_registers.json', 'utf8')) as Record<string, Register>
+const AIGC_DEMO_regs_wofields = {} as Record<string, Register> as Record<string, RegWoFdsUnfoldRep>
 
 function padZeroes (address: string, width: number): string {
   const padLength = width - address.length
