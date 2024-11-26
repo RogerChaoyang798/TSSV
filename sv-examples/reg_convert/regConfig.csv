@@ -1,7 +1,0 @@
-Register,Address,Field,Bit Width,Bit Range,Type,Reset,isSigned,repeat, Description, Field Description
-REG0,0x00,,32,,RW,0x0,,,Register 0
-REG1,0x04,,16,,RO,0x1,true,,Register 1
-REG2,0x08,REG2_field0,16,0~15,RW,0x10,,
-,,REG2_field1,16,16~31,RW,0x20,,
-MEM0,0x20 ~ 0x3F,,8,,RAM,,,,
-MEM1,0x40 ~ 0x5F,,8,,ROM,,,1,
