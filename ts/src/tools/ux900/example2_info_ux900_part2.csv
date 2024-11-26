@@ -1,6 +1,0 @@
-Name (NA),Frequency (MHz) (NA),Port (Mandatory) 1p11/2p11/2p12/2p22,Number (NA),Width (NB) (Mandatory),Depth (NW) (Mandatory),Total (KB) (NA),SW (Bit Write) (Mandatory),Column Mux (Optional),Bank (Optional),Center Decoder (Optional),Redundancy (Mandatory),BIST Interface (Mandatory),Dual Rail (Mandatory),Power Gating (Mandatory),periphery_Vt (Optional),read_assist (Mandatory),write_assist (Mandatory),pvt_enable
-u_bht_ram_bank2,1200,1p11,,16,1024,,1,,,,TRUE,FALSE,FALSE,FALSE,,FALSE,FALSE,{ 19 20 22 }
-u_bht_ram_bank3,1200,1p11,,16,1024,,1,,,,TRUE,FALSE,FALSE,FALSE,,FALSE,FALSE,{ 19 20 22 }
-u_btb_ram_bank0,1200,1p11,,140,32,,1,,,,TRUE,FALSE,FALSE,FALSE,,FALSE,FALSE,{ 19 20 22 }
-u_btb_ram_bank1,1200,1p11,,140,32,,1,,,,TRUE,FALSE,FALSE,FALSE,,FALSE,FALSE,{ 19 20 22 }
-u_btb_ram_bank2,1200,1p11,,140,32,,1,,,,TRUE,FALSE,FALSE,FALSE,,FALSE,FALSE,{ 19 20 22 }
