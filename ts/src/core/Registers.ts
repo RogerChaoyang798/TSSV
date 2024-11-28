@@ -438,7 +438,6 @@ reg_wdata = regs.PWDATA;
 regs.PRDATA = reg_rdata;
   
 regs.PREADY = 1'b1;
-regs.PSTRB = reg_wstrb;
 end
 
 `
@@ -448,7 +447,6 @@ end
         this.addAssign({ in: new Expr('regs.PSELx && regs.PENABLE && regs.PWRITE'), out: reg_wr })
         this.addAssign({ in: new Expr('regs.PSELx && !regs.PENABLE && !regs.PWRITE'), out: reg_rd })
         this.addAssign({ in: new Expr('1\'b1'), out: 'regs.PREADY' })
-        this.addAssign({ in: new Expr('regs.PSTRB'), out: wstrb })
       }
       this.addSignal('slverr', { width: 1 })
       this.addAssign({ in: new Expr('regs.PSELx && !in_range'), out: 'slverr' })
@@ -457,7 +455,6 @@ end
         clk: 'clk',
         reset: 'rst_b',
         q: 'regs.PSLVERR',
-        en: 'reg_rd',
         resetVal: 0n
       })
 
@@ -466,7 +463,6 @@ end
         const regName = reg
         const registers = this.regDefs.registers
         const baseAddr = this.regDefs.addrMap[regName]
-        
         let thisReg: Register = {
           type: 'RW',
           width: regDefs.wordSize || 32
@@ -495,18 +491,6 @@ end
             isSigned: thisReg.isSigned || false
           }
           this.addAssign({ in: new Expr(pkExpr.toString()), out: `cfg_${regName}` })
-
-          // this.addSignal(`${regName}_d`, { width: regDefs.wordSize || 32 })
-          // this.addAssign({ in: new Expr(`regs.PWDATA & ${wstrb.toString()}`), out: `${regName}_d` })
-
-          // this.addRegister({
-          //   d: 'regs.PWDATA',
-          //   clk: 'clk',
-          //   reset: 'rst_b',
-          //   q: 'cfg_' + regName.toString(),
-          //   en: `${regName}_WE`,
-          //   resetVal: thisReg.reset || 0n
-          // })
 
           this.addRegister({
             d: 'reg_wdata',
@@ -576,19 +560,14 @@ end
       this.addAssign({ in: inRangeExpr, out: inRange })
       this.body += '// Read data mux\n'
       this.addAssign({ in: next_rdataExpr, out: next_rdata })
-      // output stage
-      // let readSignal: OperationIO = {a: matchExpr, b: '', result: ''}
-      // this.addReadMux(readSignal, 'RW', regDefs.wordSize || 32)
       // 'default: pslverr<= regs.PSELx && !in_range;\n'
-
-      // this.addAssign({ in: new Expr(next_rdataExpr), out: next_rdata })
 
       this.addRegister({
         d: 'next_rdata',
         clk: 'clk',
         reset: 'rst_b',
         q: 'reg_rdata',
-        en: '',
+        en: 'reg_rd',
         resetVal: 0n
       })
     }
@@ -596,7 +575,7 @@ end
 
   private addReadMux (io: OperationIO, outExpr: string, regType: RegisterType, wordSize: number): string {
     const readSignal = `( {${wordSize}{${io.a.toString()}}} & ${io.b.toString()} )`
-    if (outExpr != '') {
+    if (outExpr !== '') {
       const modifiedReadExpr = ` |\n${readSignal}`
       outExpr += modifiedReadExpr
     } else {
@@ -606,7 +585,7 @@ end
   }
 
   private addInRange (io: OperationIO): string {
-    if (io.b.toString() != '') {
+    if (io.b.toString() !== '') {
       io.b = io.b.toString().slice(0, -1)
       const decExpr = `,\n${io.a.toString()}}`
       io.b += decExpr

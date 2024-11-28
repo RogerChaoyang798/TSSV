@@ -111,7 +111,6 @@ reg_wdata = regs.PWDATA;
 regs.PRDATA = reg_rdata;
 
 regs.PREADY = 1'b1;
-regs.PSTRB = reg_wstrb;
 end
 
 assign slverr = regs.PSELx && !in_range;
@@ -158,10 +157,12 @@ always_ff @( posedge clk  or negedge rst_b )
 if(!rst_b)
 begin
 regs.PSLVERR <= 'd0;
+CFG0_sc <= 'd0;
 end
-else if(reg_rd)
+else
 begin
 regs.PSLVERR <= slverr;
+CFG0_sc <= CFG0_sc;
 end
 
 always_ff @( posedge clk  or negedge rst_b )
@@ -197,16 +198,6 @@ end
 always_ff @( posedge clk  or negedge rst_b )
 if(!rst_b)
 begin
-CFG0_sc <= 'd0;
-end
-else
-begin
-CFG0_sc <= CFG0_sc;
-end
-
-always_ff @( posedge clk  or negedge rst_b )
-if(!rst_b)
-begin
 reg_DUMMY_DEBUG <= 'd0;
 end
 else if(DUMMY_DEBUG_WE)
@@ -219,7 +210,7 @@ if(!rst_b)
 begin
 reg_rdata <= 'd0;
 end
-else if()
+else if(reg_rd)
 begin
 reg_rdata <= next_rdata;
 end
