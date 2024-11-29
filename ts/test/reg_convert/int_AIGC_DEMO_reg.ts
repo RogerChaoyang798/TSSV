@@ -3,7 +3,6 @@ import { Module, serialize, deserialize } from 'tssv/lib/core/TSSV'
 import * as fs from 'fs'
 import * as path from 'path'
 import { inspect } from 'util'
-import diff from 'deep-diff'
 
 const myRegMap = {
   UNIT_ID: BigInt('0x00000000'),
@@ -52,20 +51,6 @@ const myRegs = {
       reset: BigInt('0x0')
     }
   }
-}
-
-// console.log(inspect(myRegs, { depth: null, colors: true }))
-const serialized = serialize(myRegs)
-// console.log(serialized)
-
-const revived = deserialize(serialized)
-// console.log(inspect(revived, { depth: null, colors: true }))
-
-const differences = diff.diff(myRegs, revived)
-if (!differences) {
-  console.log('There are no differences.')
-} else {
-  console.log(differences)
 }
 
 const testRegBlock = new RegisterBlock<typeof myRegs.addrMap>(

@@ -1,7 +1,6 @@
 import { RegisterBlock } from 'tssv/lib/core/Registers';
-import { Module, serialize, deserialize } from 'tssv/lib/core/TSSV';
+import { Module } from 'tssv/lib/core/TSSV';
 import * as fs from 'fs';
-import diff from 'deep-diff';
 const myRegMap = {
     UNIT_ID: BigInt('0x00000000'),
     CTRL: BigInt('0x00000004'),
@@ -49,18 +48,6 @@ const myRegs = {
         }
     }
 };
-// console.log(inspect(myRegs, { depth: null, colors: true }))
-const serialized = serialize(myRegs);
-// console.log(serialized)
-const revived = deserialize(serialized);
-// console.log(inspect(revived, { depth: null, colors: true }))
-const differences = diff.diff(myRegs, revived);
-if (!differences) {
-    console.log('There are no differences.');
-}
-else {
-    console.log(differences);
-}
 const testRegBlock = new RegisterBlock({
     name: 'AIGC_DEMO_reg',
     busAddressWidth: 12
