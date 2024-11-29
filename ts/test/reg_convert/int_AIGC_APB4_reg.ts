@@ -1,5 +1,6 @@
 import { type RegisterBlockDef, RegisterBlock } from 'tssv/lib/core/Registers'
 import { Module, serialize, deserialize } from 'tssv/lib/core/TSSV'
+import { APB4 } from 'tssv/lib/interfaces/AMBA/AMBA4/APB4/r0p0_0/APB4'
 import * as fs from 'fs'
 import * as path from 'path'
 import { inspect } from 'util'
@@ -53,7 +54,6 @@ const myRegs = {
     }
   }
 }
-
 // console.log(inspect(myRegs, { depth: null, colors: true }))
 const serialized = serialize(myRegs)
 // console.log(serialized)
@@ -74,7 +74,7 @@ const testRegBlock = new RegisterBlock<typeof myRegs.addrMap>(
     busAddressWidth: 12 as unknown as 32
   },
   myRegs,
-  {}
+  new APB4()
 )
 
 const tbBody =
@@ -181,7 +181,162 @@ try {
 
   const adjustedVerilog = modifySignalTypes(rawVerilog)
 
-  fs.writeFileSync('sv-examples/reg_convert/tb_intAIGCDEMOreg.sv', adjustedVerilog)
+  fs.writeFileSync('sv-examples/reg_convert/tb_intAIGCAPB4reg.sv', adjustedVerilog)
 } catch (err) {
   console.error(err)
 }
+
+// const myRegs = {
+//     wordSize: 32,
+//     addrMap: myRegMap,
+//     registers: {
+//         UNIT_ID: {
+//             type: 'RO',
+// reset: BigInt("0x00000001"),
+//             description: 'ID register'
+//         },
+//         CTRL: {
+//             type: 'RW',
+//             description: 'ctrl register',
+//             reset: BigInt("0x00010001"),
+//             fields: {
+//                 ctrl3: {
+//                     bitRange: [31, 31],
+//                     reset: BigInt('0x0')
+//                 },
+//                 ctrl2: {
+//                     bitRange: [23, 8],
+//                     reset: BigInt('0x100')
+//                 },
+//                 ctrl1: {
+//                     bitRange: [2, 2],
+//                     reset: BigInt('0x0')
+//                 },
+//                 ctrl0: {
+//                     bitRange: [1, 0],
+//                     reset: BigInt('0x1')
+//                 }
+//             }
+//         },
+//         CFG0: {
+//             type: 'WO',
+//             description: 'config register',
+//              reset: BigInt("0x00000000"),
+//             fields: {
+//                 m2_clear: {
+//                     bitRange: [24, 24],
+//                     reset: BigInt('0x0')
+//                 },
+//                 m1_clear: {
+//                     bitRange: [7, 4],
+//                     reset: BigInt('0x0')
+//                 },
+//                 m0_clear: {
+//                     bitRange: [3, 0],
+//                     reset: BigInt('0x0')
+//                 }
+//             }
+//         },
+//         DEBUG_0: {
+//             type: 'RO',
+//             description: 'bus debug register',
+//             reset: BigInt("0xFF00FF00"),
+//             fields: {
+//                 bus1_prdy: {
+//                     bitRange: [31, 24],
+//                     reset: BigInt('0xFF')
+//                 },
+//                 bus1_pvld: {
+//                     bitRange: [23, 16],
+//                     reset: BigInt('0x0')
+//                 },
+//                 bus0_prdy: {
+//                     bitRange: [15, 8],
+//                     reset: BigInt('0xFF')
+//                 },
+//                 bus0_pvld: {
+//                     bitRange: [7, 0],
+//                     reset: BigInt('0x0')
+//                 }
+//             }
+//         },
+//         DEBUG_1: {
+//             type: 'RO',
+//             // repeat: 8,
+//             description: 'submodule 1 debug registers',
+//             reset: BigInt('0x0')
+//         },
+//         DUMMY_DEBUG: {
+//             type: 'RW',
+//             description: 'dummy debug',
+//             reset: BigInt('0x0')
+//         }
+//     }
+// };
+// CTRL: {
+//     type: 'RW',
+//     description: 'ctrl register',
+//     fields: {
+//         ctrl3: {
+//             bitRange: [31, 31],
+//             reset: BigInt('0x0')
+//         },
+//         ctrl2: {
+//             bitRange: [23, 8],
+//             reset: BigInt('0x100')
+//         },
+//         ctrl1: {
+//             bitRange: [2, 2],
+//             reset: BigInt('0x0')
+//         },
+//         ctrl0: {
+//             bitRange: [1, 0],
+//             reset: BigInt('0x1')
+//         }
+//     }
+// }
+// CTRL: {
+//     type: 'RW',
+//     description: 'ctrl register',
+//     fields: {
+//         ctrl3: {
+//             bitRange: [31, 31],
+//             reset: BigInt('0x0')
+//         },
+//         ctrl2: {
+//             bitRange: [23, 8],
+//             reset: BigInt('0x100')
+//         },
+//         ctrl1: {
+//             bitRange: [2, 2],
+//             reset: BigInt('0x0')
+//         },
+//         ctrl0: {
+//             bitRange: [1, 0],
+//             reset: BigInt('0x1')
+//         }
+//     }
+// }
+
+// CTRL: {
+//     type: 'RW',
+//     description: 'ctrl register',
+//     fields: {
+//         ctrl3: {
+//             bitRange: [31, 31],
+//             reset: BigInt('0x0')
+//         },
+//         ctrl2: {
+//             bitRange: [23, 8],
+//             reset: BigInt('0x100')
+//         },
+//         ctrl1: {
+//             bitRange: [2, 2],
+//             reset: BigInt('0x0')
+//         },
+//         ctrl0: {
+//             bitRange: [1, 0],
+//             reset: BigInt('0x1')
+//         }
+//     }
+// }

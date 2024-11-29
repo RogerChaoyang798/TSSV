@@ -1,12 +1,18 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-// const csvFilePath = path.join('/home/runzhe.liu/TSSV/sv-examples/reg_convert', 'regConfig.csv')
-// const regMapFilePath = path.join('/home/runzhe.liu/TSSV/sv-examples/reg_convert', 'regMap.json')
-// const registersFilePath = path.join('/home/runzhe.liu/TSSV/sv-examples/reg_convert', 'registers.json')
-const csvFilePath = path.join('/home/runzhe.liu/TSSV/sv-examples/reg_convert', 'AIGC_DEMO_Reg.csv')
-const regMapFilePath = path.join('/home/runzhe.liu/TSSV/sv-examples/reg_convert', 'AIGC_DEMO_regMap.json')
-const registersFilePath = path.join('/home/runzhe.liu/TSSV/sv-examples/reg_convert', 'AIGC_DEMO_registers.json')
+// const csvFilePath = path.join('./sv-examples/reg_convert', 'AIGC_DEMO_Reg.csv')
+// const regMapFilePath = path.join('./sv-examples/reg_convert', 'AIGC_DEMO_regMap.json')
+// const registersFilePath = path.join('./sv-examples/reg_convert', 'AIGC_DEMO_registers.json')
+// const path = require('path')
+// const fs = require('fs')
+const csvFilePath = process.argv[2]
+const regMapFilePath = process.argv[3]
+const registersFilePath = process.argv[4]
+if (!csvFilePath || !regMapFilePath || !registersFilePath) {
+  console.error('Please provide the paths for CSV file, regMap JSON file, and registers JSON file.')
+  process.exit(1)
+}
 
 const WORD_SIZE = 32
 async function parseCSV (csvFilePath: string): Promise<string[][]> {

@@ -1,8 +1,17 @@
 import * as fs from 'fs'
 
+const registersFilePath = process.argv[2]
+const outputSvFilePath = process.argv[3]
+const outputJsonFilePath = process.argv[4]
+
+if (!registersFilePath || !outputSvFilePath || !outputJsonFilePath) {
+  console.error('Please provide the paths for registers JSON file, SV output file, and JSON output file.')
+  process.exit(1)
+}
 const WORD_SIZE = 32
 
-const svFile = fs.createWriteStream('sv-examples/reg_convert/AIGC_DEMO_reg_pkg.sv')
+const AIGC_DEMO_regs = JSON.parse(fs.readFileSync(registersFilePath, 'utf8')) as Record<string, Register>
+const svFile = fs.createWriteStream(outputSvFilePath)
 svFile.write('package AIGC_DEMO_reg_pkg;\n\n')
 svFile.write('// =============================================================================\n')
 svFile.write('// Register bit field definition\n')
@@ -29,7 +38,6 @@ interface RegWoFdsUnfoldRep {
   reset: string
 }
 
-const AIGC_DEMO_regs = JSON.parse(fs.readFileSync('sv-examples/reg_convert/AIGC_DEMO_registers.json', 'utf8')) as Record<string, Register>
 const AIGC_DEMO_regs_wofields = {} as Record<string, Register> as Record<string, RegWoFdsUnfoldRep>
 
 function padZeroes (address: string, width: number): string {
@@ -101,5 +109,5 @@ svFile.write(structsCode, 'utf8', () => {
 svFile.write('endpackage : AIGC_DEMO_reg_pkg\n')
 svFile.end()
 
-fs.writeFileSync('sv-examples/reg_convert/AIGC_DEMO_regs_wofields.json', JSON.stringify(AIGC_DEMO_regs_wofields, null, 2))
+fs.writeFileSync(outputJsonFilePath, JSON.stringify(AIGC_DEMO_regs_wofields, null, 2))
 console.log('Updated JSON with reset values')

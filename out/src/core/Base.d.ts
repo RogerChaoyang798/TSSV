@@ -68,7 +68,7 @@ export interface Signal extends baseSignal {
     value?: bigint | bigint[];
 }
 export type Signals = Record<string, Signal | undefined>;
-interface OperationIO {
+export interface OperationIO {
     a: string | Sig | bigint;
     b: string | Sig | bigint;
     result?: string | Sig;

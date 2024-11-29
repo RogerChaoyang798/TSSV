@@ -2,6 +2,59 @@
 
 
 
+interface APB4_12_32;
+
+logic  PCLK;
+logic  PRESETn;
+logic [11:0] PADDR;
+logic  PSELx;
+logic  PENABLE;
+logic  PWRITE;
+logic [31:0] PRDATA;
+logic [31:0] PWDATA;
+logic [2:0] PPROT;
+logic [3:0] PSTRB;
+logic  PREADY;
+logic  PSLVERR;
+logic  PCLKEN;
+
+
+modport outward (
+input PCLK,
+input PRESETn,
+output PADDR,
+output PSELx,
+output PENABLE,
+output PWRITE,
+input PRDATA,
+output PWDATA,
+output PPROT,
+output PSTRB,
+input PREADY,
+input PSLVERR,
+input PCLKEN
+);
+
+modport inward (
+input PCLK,
+input PRESETn,
+input PADDR,
+input PSELx,
+input PENABLE,
+input PWRITE,
+output PRDATA,
+input PWDATA,
+input PPROT,
+input PSTRB,
+output PREADY,
+output PSLVERR,
+input PCLKEN
+);
+
+
+endinterface
+
+
 
 
 /* verilator lint_off WIDTH */
@@ -9,20 +62,13 @@ module AIGC_DEMO_reg
 (
 input logic  clk,
 input logic  rst_b,
-input logic [11:0] paddr,
-input logic [31:0] pwdata,
-output logic [31:0] prdata,
-input logic  psel,
-input logic  penable,
-input logic  pwrite,
-output logic  pready,
-output logic  pslverr,
 input logic [31:0] cfg_unit_id,
 output logic [31:0] cfg_ctrl,
 output logic [31:0] cfg_cfg0,
 input logic [31:0] cfg_debug_0,
 input logic [31:0] cfg_debug_1,
-output logic [31:0] cfg_dummy_debug
+output logic [31:0] cfg_dummy_debug,
+APB4_12_32.inward regs
 );
 
 logic  reg_rd;
@@ -57,16 +103,16 @@ assign clrzeros = 32'h0;
 // apb interface
 always_comb
 begin
-reg_wr = psel && penable && pwrite;
-reg_rd = psel && !penable && !pwrite;
-reg_addr = paddr;
-reg_wdata = pwdata;
-prdata = reg_rdata;
+reg_wr = regs.PSELx && regs.PENABLE && regs.PWRITE;
+reg_rd = regs.PSELx && !regs.PENABLE && !regs.PWRITE;
+reg_addr = regs.PADDR;
+reg_wdata = regs.PWDATA;
+regs.PRDATA = reg_rdata;
 
-pready = 1'b1;
+regs.PREADY = 1'b1;
 end
 
-assign slverr = psel && !in_range;
+assign slverr = regs.PSELx && !in_range;
 assign dec_unit_id = (reg_addr == 12'h000) ? 1'd1 : 1'd0;
 // RO reg: input
 assign reg_unit_id = cfg_unit_id;
@@ -109,12 +155,12 @@ assign next_rdata =
 always_ff @( posedge clk  or negedge rst_b )
 if(!rst_b)
 begin
-pslverr <= 'd0;
+regs.PSLVERR <= 'd0;
 cfg0_sc <= 'd0;
 end
 else
 begin
-pslverr <= slverr;
+regs.PSLVERR <= slverr;
 cfg0_sc <= cfg0_sc;
 end
 
@@ -180,14 +226,7 @@ input logic  clk,
 input logic  rst_b
 );
 
-logic [11:0] paddr;
-logic [31:0] pwdata;
-logic [31:0] prdata;
-logic  psel;
-logic  penable;
-logic  pwrite;
-logic  pready;
-logic  pslverr;
+APB4_12_32 regs();
 logic [31:0] cfg_unit_id;
 logic [31:0] cfg_ctrl;
 logic [31:0] cfg_cfg0;
@@ -259,20 +298,13 @@ AIGC_DEMO_reg dut
 (
 .clk(clk),
 .rst_b(rst_b),
-.paddr(paddr),
-.pwdata(pwdata),
-.prdata(prdata),
-.psel(psel),
-.penable(penable),
-.pwrite(pwrite),
-.pready(pready),
-.pslverr(pslverr),
 .cfg_unit_id(cfg_unit_id),
 .cfg_ctrl(cfg_ctrl),
 .cfg_cfg0(cfg_cfg0),
 .cfg_debug_0(cfg_debug_0),
 .cfg_debug_1(cfg_debug_1),
-.cfg_dummy_debug(cfg_dummy_debug)
+.cfg_dummy_debug(cfg_dummy_debug),
+.regs(regs)
 );
 
 

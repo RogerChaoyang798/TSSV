@@ -919,7 +919,7 @@ export class Module {
         if (outSig.type && (!(outSig.type === 'wire' || outSig.type === 'logic'))) {
             throw Error(`${io.out.toString()} signal must be either wire or logic in assign statement`);
         }
-        this.body += `  assign ${io.out.toString()} = ${io.in.toString()};\n`;
+        this.body += `assign ${io.out.toString()} = ${io.in.toString()};\n`;
         if (typeof io.out === 'string') {
             return new Sig(io.out);
         }
