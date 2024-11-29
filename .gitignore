@@ -6,7 +6,7 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
-*.js
+
 *.d.ts
 .sv
 *.json
