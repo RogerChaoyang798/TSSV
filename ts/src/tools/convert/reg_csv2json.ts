@@ -1,11 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-// const csvFilePath = path.join('./sv-examples/reg_convert', 'AIGC_DEMO_Reg.csv')
-// const regMapFilePath = path.join('./sv-examples/reg_convert', 'AIGC_DEMO_regMap.json')
-// const registersFilePath = path.join('./sv-examples/reg_convert', 'AIGC_DEMO_registers.json')
-// const path = require('path')
-// const fs = require('fs')
 const csvFilePath = process.argv[2]
 const regMapFilePath = process.argv[3]
 const registersFilePath = process.argv[4]
@@ -60,6 +55,7 @@ async function generateRegMapAndRegs () {
       if (!registers[curRegName]) {
         registers[curRegName] = {
           type,
+          startAddr: startAddrHex,
           repeat: repeat || 1,
           description: description || `Description for ${curRegName}`
         }

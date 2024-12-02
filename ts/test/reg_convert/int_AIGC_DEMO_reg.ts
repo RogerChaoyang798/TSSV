@@ -4,53 +4,43 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { inspect } from 'util'
 
-const myRegMap = {
-  UNIT_ID: BigInt('0x00000000'),
-  CTRL: BigInt('0x00000004'),
-  CFG0: BigInt('0x0000000C'),
-  DEBUG_0: BigInt('0x00000400'),
-  DEBUG_1: BigInt('0x00000404'),
-  DUMMY_DEBUG: BigInt('0x00000FFC')
-} as const
+interface RegWoFdsUnfoldRep {
+  startAddr: string
+  type: string
+  description: string
+  reset: string
+}
 
+const regsPath = process.argv[2]
+const outputSvFilePath = process.argv[3]
+
+const regs = JSON.parse(fs.readFileSync(regsPath, 'utf8')) as Record<string, RegWoFdsUnfoldRep>
+
+// const regArray: [string, string][] = JSON.parse(rawData)
+
+// const myRegMap = regArray.reduce((acc, [regName, regAddr]) => {
+//   const address = regAddr.startsWith('0x') ? '0x' + regAddr.slice(2).padStart(8, '0') : regAddr
+//   acc[regName] = BigInt(address)
+//   return acc
+// }, {} as Record<string, bigint>)
+const myRegMap = Object.entries(regs).reduce((acc, [regName, regDetails]) => {
+  acc[regName] = BigInt(regDetails.startAddr)
+  return acc
+}, {} as Record<string, bigint>)
+
+const registers: Record<string, { type: string, reset: bigint, description: string }> = {}
+
+for (const [regName, regData] of Object.entries(regs)) {
+  registers[regName] = {
+    type: regData.type,
+    reset: BigInt(regData.reset),
+    description: regData.description
+  }
+}
 const myRegs = {
   wordSize: 32 as 32,
   addrMap: myRegMap,
-  registers: {
-    UNIT_ID: {
-      type: 'RO',
-      reset: BigInt('0x00000001'),
-      description: 'ID register'
-    },
-    CTRL: {
-      type: 'RW',
-      repeat: 1,
-      description: 'ctrl register',
-      reset: BigInt('0x00010001')
-    },
-    CFG0: {
-      type: 'WO',
-      description: 'config register',
-      reset: BigInt('0x00000000')
-    },
-    DEBUG_0: {
-      type: 'RO',
-      description: 'bus debug register',
-      reset: BigInt('0xFF00FF00')
-    },
-    DEBUG_1: {
-      type: 'RO',
-      repeat: 8,
-      description: 'submodule 1 debug registers',
-      reset: BigInt('0x0')
-    },
-    DUMMY_DEBUG: {
-      type: 'RW',
-      description: 'dummy debug',
-      isSigned: false,
-      reset: BigInt('0x0')
-    }
-  }
+  registers
 }
 
 const testRegBlock = new RegisterBlock<typeof myRegs.addrMap>(
@@ -166,7 +156,7 @@ try {
 
   const adjustedVerilog = modifySignalTypes(rawVerilog)
 
-  fs.writeFileSync('sv-examples/reg_convert/tb_intAIGCDEMOreg.sv', adjustedVerilog)
+  fs.writeFileSync(outputSvFilePath, adjustedVerilog)
 } catch (err) {
   console.error(err)
 }

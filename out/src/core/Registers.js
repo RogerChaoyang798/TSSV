@@ -572,9 +572,7 @@ end
                 this.addAssign({ in: new Expr(`(reg_addr == ${params.busAddressWidth}'h${this.padZeroes(baseAddr.toString(16).toUpperCase(), (params.busAddressWidth || 32) / 4)}) ? 1'd1 : 1'd0`), out: matchExpr });
                 const pkExpr = this.addSignal(`reg_${regName}`, { width: regDefs.wordSize || 32 });
                 if (thisReg.type === 'RW') {
-                    const RE_Sig = this.addSignal(`${regName}_re`, { width: 1 });
                     const WE_Sig = this.addSignal(`${regName}_we`, { width: 1 });
-                    this.addAssign({ in: new Expr(`reg_rd && ${matchExpr.toString()}`), out: RE_Sig });
                     this.addAssign({ in: new Expr(`reg_wr && ${matchExpr.toString()}`), out: WE_Sig });
                     this.body += '// non-RO: output\n';
                     this.IOs['cfg_' + regName.toString()] = {

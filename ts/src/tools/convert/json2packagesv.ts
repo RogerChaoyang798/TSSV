@@ -9,7 +9,7 @@ if (!registersFilePath || !outputSvFilePath || !outputJsonFilePath) {
   process.exit(1)
 }
 const WORD_SIZE = 32
-
+const BITS_OF_BYTE = 8
 const AIGC_DEMO_regs = JSON.parse(fs.readFileSync(registersFilePath, 'utf8')) as Record<string, Register>
 const svFile = fs.createWriteStream(outputSvFilePath)
 svFile.write('package AIGC_DEMO_reg_pkg;\n\n')
@@ -24,6 +24,7 @@ interface Field {
 }
 
 interface Register {
+  startAddr: string
   type: string
   description: string
   repeat: number
@@ -32,9 +33,9 @@ interface Register {
 }
 
 interface RegWoFdsUnfoldRep {
+  startAddr: string
   type: string
   description: string
-  // repeat: number
   reset: string
 }
 
@@ -46,7 +47,7 @@ function padZeroes (address: string, width: number): string {
   return '0'.repeat(padLength) + address
 }
 
-function generateStruct (registerName: string, register: Register): string {
+function genPackedCalReset (registerName: string, register: Register): string {
   const fields = register.fields
   let result = 'typedef struct packed {\n'
   const sortedFields = Object.entries(fields).sort((a, b) => b[1].bitRange[0] - a[1].bitRange[0])
@@ -67,11 +68,11 @@ function generateStruct (registerName: string, register: Register): string {
     const [msb, lsb] = field.bitRange
     if (lastBit > msb + 1) {
       result += `  logic [${lastBit - msb - 2}:0] res_${resCount--};\n`
-      resBinStr = '0'.repeat(lastBit - msb - 1);
+      resBinStr = '0'.repeat(lastBit - msb - 1)
       reset += resBinStr
     }
     fieldBinStr = padZeroes(Number(field.reset).toString(2), msb - lsb + 1)
-    reset += fieldBinStr;
+    reset += fieldBinStr
     if (msb === lsb) {
       result += `  logic ${name};\n`
     } else {
@@ -83,21 +84,28 @@ function generateStruct (registerName: string, register: Register): string {
     result += `  logic [${lastBit}:0] res_${resCount--};\n`
   }
   result += `} ${registerName}_t;\n`
-  // console.log(reset)
-  // console.log(reset.length)
   register.reset = `0x${padZeroes(parseInt(reset, 2).toString(16).toUpperCase(), 8)}`
   return result
 }
 
-function generateAllStructs(registers: Record<string, Register>): string {
+function generateAllStructs (registers: Record<string, Register>): string {
   let result = ''
   for (const [registerName, register] of Object.entries(registers)) {
-    result += generateStruct(registerName, register)
+    result += genPackedCalReset(registerName, register)
     result += '\n'
   }
-  Object.keys(AIGC_DEMO_regs).forEach(key => {
-    const { fields, ...rest } = AIGC_DEMO_regs[key];
-    AIGC_DEMO_regs_wofields[key] = rest
+  Object.keys(registers).forEach(key => {
+    let { startAddr, repeat, fields, ...rest } = registers[key]
+    const registerStartAddr = parseInt(startAddr, 16)
+    if (repeat && repeat > 1) {
+      for (let i = 0; i < repeat; i++) {
+        const newRegisterName = `${key}_${i}`
+        startAddr = `0x${(registerStartAddr + i * WORD_SIZE / BITS_OF_BYTE).toString(16)}`
+        AIGC_DEMO_regs_wofields[newRegisterName] = { startAddr, ...rest }
+      }
+    } else {
+      AIGC_DEMO_regs_wofields[key] = { startAddr, ...rest }
+    }
   })
   return result
 }
