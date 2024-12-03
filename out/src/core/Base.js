@@ -1160,7 +1160,6 @@ ${bindingsArray.join(',\n')}
 ${interfacesString}        
 ${subModulesString}
         
-/* verilator lint_off WIDTH */        
 module ${this.name} ${paramsString}
    (
 ${IOString}
@@ -1171,7 +1170,6 @@ ${signalString}
 ${this.body}
 
 endmodule
-/* verilator lint_on WIDTH */        
 `;
         return verilog;
     }
