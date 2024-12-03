@@ -152,7 +152,7 @@ try {
       .join('\n')
   }
 
-  const rawVerilog = tb_testRegBlock.writeSystemVerilog()
+  const rawVerilog = testRegBlock.writeSystemVerilog()
 
   const adjustedVerilog = modifySignalTypes(rawVerilog)
 
