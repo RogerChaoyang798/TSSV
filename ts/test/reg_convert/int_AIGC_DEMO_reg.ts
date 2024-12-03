@@ -67,13 +67,12 @@ try {
   let adjustedVerilog = modifySignalTypes(rawVerilog)
   const importStatement = `import ${testRegBlock.name}_pkg::*;`
 
-adjustedVerilog = `${importStatement}
+  adjustedVerilog = `${importStatement}
 
 // =============================================================================
 // Register module
-// =============================================================================
-` + adjustedVerilog +
-` : ${testRegBlock.name}_pkg
+// =============================================================================` +
+adjustedVerilog + ` : ${testRegBlock.name}_pkg
 `
 
   fs.writeFileSync(outputSvFilePath, adjustedVerilog)
