@@ -482,7 +482,6 @@ end
                     });
                 }
                 else if (thisReg.type === 'RO') {
-                    // Use original address for logic
                     this.body += '// RO reg: input\n';
                     this.IOs['cfg_' + regName.toString()] = {
                         direction: 'input',
@@ -574,12 +573,12 @@ end
                 if (thisReg.type === 'RW') {
                     const WE_Sig = this.addSignal(`${regName}_we`, { width: 1 });
                     this.addAssign({ in: new Expr(`reg_wr && ${matchExpr.toString()}`), out: WE_Sig });
-                    this.body += '// non-RO: output\n';
                     this.IOs['cfg_' + regName.toString()] = {
                         direction: 'output',
                         width: thisReg.width || regDefs.wordSize,
                         isSigned: thisReg.isSigned || false
                     };
+                    this.body += '// non-RO: output\n';
                     this.addAssign({ in: new Expr(pkExpr.toString()), out: `cfg_${regName}` });
                     this.addRegister({
                         d: reg_wdata,
@@ -600,12 +599,12 @@ end
                     const readSignal = { a: matchExpr, b: '32\'h0' };
                     next_rdataExpr = new Expr(this.addReadMux(readSignal, next_rdataExpr.toString(), 'WO', regDefs.wordSize || 32));
                     inRangeExpr = new Expr(this.addInRange({ a: matchExpr, b: inRangeExpr.toString() }));
-                    this.body += '// non-RO: output\n';
                     this.IOs[`cfg_${regName}`] = {
                         direction: 'output',
                         width: thisReg.width || regDefs.wordSize,
                         isSigned: thisReg.isSigned || false
                     };
+                    this.body += '// non-RO: output\n';
                     this.addAssign({ in: new Expr(pkExpr.toString()), out: `cfg_${regName}` });
                     // this.body += '// WO self clear reg\n'
                     this.addRegister({
@@ -643,6 +642,27 @@ end
                     this.addAssign({ in: new Expr(`cfg_${regName}`), out: pkExpr });
                     const readSignal = { a: matchExpr, b: pkExpr };
                     next_rdataExpr = new Expr(this.addReadMux(readSignal, next_rdataExpr.toString(), 'RO', regDefs.wordSize || 32));
+                    inRangeExpr = new Expr(this.addInRange({ a: matchExpr, b: inRangeExpr.toString() }));
+                }
+                else if (thisReg.type === 'W1C') {
+                    const W1C_Sig = this.addSignal(`${regName}_w1c`, { width: 1 });
+                    this.addAssign({ in: new Expr(`reg_wr && ${matchExpr.toString()} && (${reg_wdata.toString()} == ${regDefs.wordSize || 32}'h1)`), out: W1C_Sig });
+                    this.IOs['cfg_' + regName.toString()] = {
+                        direction: 'output',
+                        width: thisReg.width || regDefs.wordSize,
+                        isSigned: thisReg.isSigned || false
+                    };
+                    this.addAssign({ in: new Expr(pkExpr.toString()), out: `cfg_${regName}` });
+                    this.addRegister({
+                        d: clrzeros,
+                        clk: 'clk',
+                        reset: 'rst_b',
+                        q: pkExpr,
+                        en: W1C_Sig,
+                        resetVal: thisReg.reset || 0n
+                    });
+                    const readSignal = { a: matchExpr, b: pkExpr };
+                    next_rdataExpr = new Expr(this.addReadMux(readSignal, next_rdataExpr.toString(), 'W1C', regDefs.wordSize || 32));
                     inRangeExpr = new Expr(this.addInRange({ a: matchExpr, b: inRangeExpr.toString() }));
                 }
             }
