@@ -26,15 +26,25 @@ const testRegBlock = new RegisterBlock({
 }, myRegs, {});
 try {
     const modifySignalTypes = (content) => {
-        const dynamicPattern = new RegExp(`^logic\s+\[${myRegs.wordSize - 1}:0\]\s+(reg_[A-Z0-9][A-Za-z0-9_]*)\s*`);
+        const dynamicPattern = new RegExp(`^logic\\s+\\[${myRegs.wordSize - 1}:0\\]\\s+(reg_(?!rdata|wdata)[a-z0-9][a-z0-9_]*)\\s*`);
         return content
             .split('\n')
             .map(line => {
             const trimmedLine = line.trim();
             const match = trimmedLine.match(dynamicPattern);
             if (match) {
-                const signalName = match[1];
-                return trimmedLine.replace(dynamicPattern, `${signalName}_t ${signalName};`);
+                let signalName = match[1];
+                signalName = signalName.replace(/^reg_/, '');
+                const debugPattern = /^(debug_\d)_(\d)$/
+                let packName =''
+                if (debugPattern.test(signalName)) {
+                    packName = signalName.replace(debugPattern, '$1'); 
+                    packName = `${packName}_t`
+                    return trimmedLine.replace(dynamicPattern, `${packName} ${signalName}`);
+                } else {
+                    return trimmedLine.replace(dynamicPattern, `${signalName}_t ${signalName}`);
+                }
+                
             }
             return trimmedLine;
         })
