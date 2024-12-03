@@ -39,8 +39,7 @@ try {
                 let packName =''
                 if (debugPattern.test(signalName)) {
                     packName = signalName.replace(debugPattern, '$1'); 
-                    packName = `${packName}_t`
-                    return trimmedLine.replace(dynamicPattern, `${packName.toUpperCase()} reg_${signalName}`);
+                    return trimmedLine.replace(dynamicPattern, `${packName.toUpperCase()}_t reg_${signalName}`);
                 } else {
                     return trimmedLine.replace(dynamicPattern, `${signalName.toUpperCase()}_t reg_${signalName}`);
                 }
