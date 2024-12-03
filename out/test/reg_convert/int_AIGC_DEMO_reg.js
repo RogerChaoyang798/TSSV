@@ -48,7 +48,8 @@ try {
 // =============================================================================
 // Register module
 // =============================================================================
-` + adjustedVerilog + ` : ${testRegBlock.name}_pkg`;
+` + adjustedVerilog + ` : ${testRegBlock.name}_pkg
+`;
     fs.writeFileSync(outputSvFilePath, adjustedVerilog);
 }
 catch (err) {

@@ -1169,8 +1169,7 @@ ${signalString}
 
 ${this.body}
 
-endmodule
-`;
+endmodule`;
         return verilog;
     }
 }
