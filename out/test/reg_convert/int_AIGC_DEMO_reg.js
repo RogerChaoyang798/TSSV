@@ -40,9 +40,9 @@ try {
                 if (debugPattern.test(signalName)) {
                     packName = signalName.replace(debugPattern, '$1'); 
                     packName = `${packName}_t`
-                    return trimmedLine.replace(dynamicPattern, `${packName} ${signalName}`);
+                    return trimmedLine.replace(dynamicPattern, `${packName} reg_${signalName}`);
                 } else {
-                    return trimmedLine.replace(dynamicPattern, `${signalName}_t ${signalName}`);
+                    return trimmedLine.replace(dynamicPattern, `${signalName}_t reg_${signalName}`);
                 }
                 
             }
