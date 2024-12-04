@@ -168,8 +168,6 @@ assign dec_DEBUG_1_5 = (regs.PADDR == 12'h418) ? 1'd1 : 1'd0;
 assign dec_DEBUG_1_6 = (regs.PADDR == 12'h41C) ? 1'd1 : 1'd0;
 assign dec_DEBUG_1_7 = (regs.PADDR == 12'h420) ? 1'd1 : 1'd0;
 
-
-
 // RO reg: input
 assign reg_DEBUG_1_0 = cfg_DEBUG_1_0;
 assign reg_DEBUG_1_1 = cfg_DEBUG_1_1;

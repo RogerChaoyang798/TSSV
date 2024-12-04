@@ -40,4 +40,8 @@ typedef struct packed {
   logic [31: 0] dummy_debug;
 } DUMMY_DEBUG_t;
 
+typedef struct packed {
+  logic [31: 0] status_reg;
+} STASUS_REG_t;
+
 endpackage : AIGC_DEMO_reg_pkg
