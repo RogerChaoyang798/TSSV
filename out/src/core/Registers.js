@@ -449,7 +449,6 @@ end
                 next_rdataExpr = new Expr(this.addReadMux(readSignal, next_rdataExpr.toString(), regDefs.wordSize || 32));
                 inRangeExpr = new Expr(this.addInRange({ a: matchSig, b: inRangeExpr.toString() }));
             }
-            this.body += '// address decode\n';
             this.addAssign({ in: inRangeExpr, out: inRange });
             this.body += '// Read data mux\n';
             this.addAssign({ in: next_rdataExpr, out: next_rdata });
