@@ -1,5 +1,5 @@
 import { Module, type TSSVParameters, type IntRange, type Interface } from 'tssv/lib/core/TSSV';
-type RegisterType = 'RO' | 'RW' | 'WO' | 'RAM' | 'ROM' | string;
+type RegisterType = 'RO' | 'RW' | 'WO' | 'RAM' | 'ROM' | 'W1C' | 'W1T' | 'W1S' | string;
 interface Field {
     reset?: bigint;
     description?: string;
@@ -75,9 +75,8 @@ export interface RegisterBlockParameters extends TSSVParameters {
 export declare class RegisterBlock<T extends Record<string, bigint>> extends Module {
     params: RegisterBlockParameters;
     regDefs: RegisterBlockDef<T>;
-    constructor(params: RegisterBlockParameters, regDefs: RegisterBlockDef<T>, busInterface: Interface | {});
-    private addReadMux;
-    private addInRange;
+    constructor(params: RegisterBlockParameters, regDefs: RegisterBlockDef<T>, busInterface: Interface | Record<string, unknown>);
+    private handleWriteOneClearOrToggle;
     private replaceZerosWithX;
     private padZeroes;
     private padZeroesRight;

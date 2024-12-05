@@ -976,6 +976,33 @@ ${caseAssignments}
         }
         return io.out;
     }
+    addInRange(io) {
+        if (io.b instanceof Sig) {
+            throw Error('unsupported type of io.b in addInRange()');
+        }
+        else {
+            if (io.b.toString() !== '') {
+                io.b = io.b.toString().slice(0, -1);
+                const decExpr = `,\n${io.a.toString()}}`;
+                io.b += decExpr;
+            }
+            else {
+                io.b += `|{${io.a.toString()}}`;
+            }
+            return io.b.toString();
+        }
+    }
+    addReadMux(io, outExpr, wordSize) {
+        const readSignal = `( {${wordSize}{${io.a.toString()}}} & ${io.b.toString()} )`;
+        if (outExpr !== '') {
+            const modifiedReadExpr = ` |\n${readSignal}`;
+            outExpr += modifiedReadExpr;
+        }
+        else {
+            outExpr += `\n${readSignal}`;
+        }
+        return outExpr;
+    }
     /**
        * print some debug information to the console
        */

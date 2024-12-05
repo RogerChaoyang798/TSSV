@@ -4,7 +4,7 @@ import { Memory } from 'tssv/lib/interfaces/Memory'
 import { APB4 } from 'tssv/lib/interfaces/AMBA/AMBA4/APB4/r0p0_0/APB4'
 import { isObjectBindingPattern } from 'typescript'
 
-type RegisterType = 'RO' | 'RW' | 'WO' | 'RAM' | 'ROM' | string
+type RegisterType = 'RO' | 'RW' | 'WO' | 'RAM' | 'ROM' | 'W1C' | 'W1T' | 'W1S' | string
 interface Field {
   reset?: bigint
   description?: string
@@ -699,10 +699,34 @@ end
             width: thisReg.width || regDefs.wordSize,
             isSigned: thisReg.isSigned || false
           }
-          this.addAssign({ in: new Expr(`cfg_${regName}`), out: pkExpr })
-          const readSignal: OperationIO = { a: matchExpr, b: pkExpr }
-          next_rdataExpr = new Expr(this.addReadMux(readSignal, next_rdataExpr.toString(), 'RO', regDefs.wordSize || 32))
-          inRangeExpr = new Expr(this.addInRange({ a: matchExpr, b: inRangeExpr.toString() }))
+          this.addAssign({ in: new Expr(`cfg_${regName}`), out: pkSig })
+        } else if (thisReg.type === 'W1C') {
+          this.handleWriteOneClearOrToggle(
+            regName,
+            pkSig,
+            matchSig,
+            thisReg,
+            regDefs,
+            'W1C'
+          )
+        } else if (thisReg.type === 'W1T') {
+          this.handleWriteOneClearOrToggle(
+            regName,
+            pkSig,
+            matchSig,
+            thisReg,
+            regDefs,
+            'W1T'
+          )
+        } else if (thisReg.type === 'W1S') {
+          this.handleWriteOneClearOrToggle(
+            regName,
+            pkSig,
+            matchSig,
+            thisReg,
+            regDefs,
+            'W1S'
+          )
         }
       }
       this.body += '// address decode\n'
@@ -722,26 +746,43 @@ end
     }
   }
 
-  private addReadMux (io: OperationIO, outExpr: string, regType: RegisterType, wordSize: number): string {
-    const readSignal = `( {${wordSize}{${io.a.toString()}}} & ${io.b.toString()} )`
-    if (outExpr !== '') {
-      const modifiedReadExpr = ` |\n${readSignal}`
-      outExpr += modifiedReadExpr
-    } else {
-      outExpr += `\n${readSignal}`
+  private handleWriteOneClearOrToggle (
+    regName: string,
+    pkSig: Sig,
+    matchSig: Sig,
+    thisReg: any,
+    regDefs: any,
+    type: 'W1C' | 'W1T' | 'W1S'
+  ) {
+    const reg_wdata_hdl = this.addSignal(`${pkSig.toString()}_${type.toLowerCase()}`, { width: regDefs.wordSize || 32 })
+    let resetOp: string = ''
+    if (type === 'W1C') {
+      resetOp = '& ~'
+    } else if (type === 'W1T') {
+      resetOp = '^ '
+    } else if (type === 'W1S') {
+      resetOp = '| '
     }
-    return outExpr
-  }
+    this.addAssign({ in: new Expr(`${pkSig.toString()} ${resetOp}reg_wdata`), out: reg_wdata_hdl })
 
-  private addInRange (io: OperationIO): string {
-    if (io.b.toString() !== '') {
-      io.b = io.b.toString().slice(0, -1)
-      const decExpr = `,\n${io.a.toString()}}`
-      io.b += decExpr
-    } else {
-      io.b += `|{${io.a.toString()}}`
+    const enableSignal = this.addSignal(`${regName}_${type.toLowerCase()}e`, { width: 1 })
+    this.addAssign({ in: new Expr(`reg_wr && ${matchSig.toString()}`), out: enableSignal })
+
+    this.IOs['cfg_' + regName.toString()] = {
+      direction: 'output',
+      width: thisReg.width || regDefs.wordSize,
+      isSigned: thisReg.isSigned || false
     }
-    return io.b.toString()
+    this.addAssign({ in: new Expr(pkSig.toString()), out: `cfg_${regName}` })
+
+    this.addRegister({
+      d: reg_wdata_hdl,
+      clk: 'clk',
+      reset: 'rst_b',
+      q: pkSig,
+      en: enableSignal,
+      resetVal: thisReg.reset || 0n
+    })
   }
 
   private replaceZerosWithX (binaryStr: string): string {

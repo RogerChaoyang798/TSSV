@@ -264,6 +264,8 @@ export declare class Module {
         out: string | Sig;
         default?: string | Sig | Expr;
     }): Sig;
+    addInRange(io: OperationIO): string;
+    addReadMux(io: OperationIO, outExpr: string, wordSize: number): string;
     /**
        * print some debug information to the console
        */
