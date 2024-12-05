@@ -12,42 +12,7 @@ export class RegAddr {
         return nextAddr;
     }
 }
-/**
- * WRITE
- *
- * @wavedrom
- * ```json
- * {
- *   "signal": [
- *     {"name": "     clk", "wave": "p........."},
- *     {"name": " data_wr", "wave": "03........", "data": ["D"]},
- *     {"name": "    addr", "wave": "04........", "data": ["A"]},
- *     {"name": "      we", "wave": "01.0......"},
- *     {"name": "      re", "wave": "0........."},
- *     {"name": " data_rd", "wave": "0........."},
- *     {"name": "   ready", "wave": "10.1......"}
- *   ]
- * }
- * ```
- */
-/**
- * READ
- *
- * @wavedrom
- * ```json
- * {
- *   "signal": [
- *     {"name": "     clk", "wave": "p........."},
- *     {"name": " data_wr", "wave": "0........."},
- *     {"name": "    addr", "wave": "04........", "data": ["A"]},
- *     {"name": "      we", "wave": "0........."},
- *     {"name": "      re", "wave": "01.0......"},
- *     {"name": " data_rd", "wave": "0.......5.", "data": ["D"]},
- *     {"name": "   ready", "wave": "10......1."}
- *   ]
- * }
- * ```
- */
+
 export class RegisterBlock extends Module {
     constructor(params, regDefs, busInterface) {
         super({
@@ -456,7 +421,6 @@ end
                         isSigned: thisReg.isSigned || false
                     };
                     this.addAssign({ in: new Expr(pkExpr.toString()), out: `cfg_${regName}` });
-                    // this.body += '// WO self clear reg\n'
                     this.addRegister({
                         d: reg_wdata,
                         clk: 'clk',
@@ -494,11 +458,9 @@ end
                     inRangeExpr = new Expr(this.addInRange({ a: matchExpr, b: inRangeExpr.toString() }));
                 }
             }
-            this.body += '// address decode\n';
             this.addAssign({ in: inRangeExpr, out: inRange });
             this.body += '// Read data mux\n';
             this.addAssign({ in: next_rdataExpr, out: next_rdata });
-            // 'default: pslverr<= regs.PSELx && !in_range;\n'
             this.addRegister({
                 d: next_rdata,
                 clk: 'clk',
@@ -578,7 +540,6 @@ end
                         width: thisReg.width || regDefs.wordSize,
                         isSigned: thisReg.isSigned || false
                     };
-                    this.body += '// non-RO: output\n';
                     this.addAssign({ in: new Expr(pkExpr.toString()), out: `cfg_${regName}` });
                     this.addRegister({
                         d: reg_wdata,
@@ -604,9 +565,7 @@ end
                         width: thisReg.width || regDefs.wordSize,
                         isSigned: thisReg.isSigned || false
                     };
-                    this.body += '// non-RO: output\n';
                     this.addAssign({ in: new Expr(pkExpr.toString()), out: `cfg_${regName}` });
-                    // this.body += '// WO self clear reg\n'
                     this.addRegister({
                         d: reg_wdata,
                         clk: 'clk',
@@ -633,7 +592,6 @@ end
                 }
                 else if (thisReg.type === 'RO') {
                     // Use original address for logic
-                    this.body += '// RO reg: input\n';
                     this.IOs['cfg_' + regName.toString()] = {
                         direction: 'input',
                         width: thisReg.width || regDefs.wordSize,
@@ -668,7 +626,6 @@ end
                     inRangeExpr = new Expr(this.addInRange({ a: matchExpr, b: inRangeExpr.toString() }));
                 }
             }
-            this.body += '// address decode\n';
             this.addAssign({ in: inRangeExpr, out: inRange });
             this.body += '// Read data mux\n';
             this.addAssign({ in: next_rdataExpr, out: next_rdata });
