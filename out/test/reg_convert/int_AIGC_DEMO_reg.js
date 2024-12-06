@@ -1,5 +1,16 @@
 import { RegisterBlock } from 'tssv/lib/core/Registers';
 import * as fs from 'fs';
+import { execSync } from 'child_process';
+const getCommitId = () => {
+    try {
+        return execSync('git rev-parse HEAD').toString().trim();
+    }
+    catch (err) {
+        console.error('Failed to get Git commit ID', err);
+        return 'unknown_commit';
+    }
+};
+const commitId = getCommitId();
 const regsPath = process.argv[2];
 const outputSvFilePath = process.argv[3];
 const regs = JSON.parse(fs.readFileSync(regsPath, 'utf8'));
@@ -26,24 +37,15 @@ const testRegBlock = new RegisterBlock({
 }, myRegs, {});
 try {
     const modifySignalTypes = (content) => {
-        const dynamicPattern = new RegExp(`^logic\\s+\\[${myRegs.wordSize - 1}:0\\]\\s+(reg_(?!rdata|wdata)[a-z0-9][a-z0-9_]*)\\s*`);
+        const dynamicPattern = new RegExp(`^logic\s+\[${myRegs.wordSize - 1}:0\]\s+(reg_[A-Z0-9][A-Za-z0-9_]*)\s*`);
         return content
             .split('\n')
             .map(line => {
             const trimmedLine = line.trim();
             const match = trimmedLine.match(dynamicPattern);
             if (match) {
-                let signalName = match[1];
-                signalName = signalName.replace(/^reg_/, '');
-                const debugPattern = /^(debug_\d)_(\d)$/
-                let packName =''
-                if (debugPattern.test(signalName)) {
-                    packName = signalName.replace(debugPattern, '$1'); 
-                    return trimmedLine.replace(dynamicPattern, `${packName.toUpperCase()}_t reg_${signalName}`);
-                } else {
-                    return trimmedLine.replace(dynamicPattern, `${signalName.toUpperCase()}_t reg_${signalName}`);
-                }
-                
+                const signalName = match[1];
+                return trimmedLine.replace(dynamicPattern, `${signalName}_t ${signalName};`);
             }
             return trimmedLine;
         })
@@ -55,8 +57,11 @@ try {
     adjustedVerilog = `${importStatement}
 
 // =============================================================================
-// Register module
-// =============================================================================` +
+// Generated Register Block 1.0
+// =============================================================================
+
+// Commit ID: ${commitId}
+` +
         adjustedVerilog + ` : ${testRegBlock.name}_pkg
 `;
     fs.writeFileSync(outputSvFilePath, adjustedVerilog);

@@ -1,4 +1,15 @@
 import * as fs from 'fs';
+import { execSync } from 'child_process';
+const getCommitId = () => {
+    try {
+        return execSync('git rev-parse HEAD').toString().trim();
+    }
+    catch (err) {
+        console.error('Failed to get Git commit ID', err);
+        return 'unknown_commit';
+    }
+};
+const commitId = getCommitId();
 const registersFilePath = process.argv[2];
 const outputSvFilePath = process.argv[3];
 const outputJsonFilePath = process.argv[4];
@@ -12,7 +23,8 @@ const AIGC_DEMO_regs = JSON.parse(fs.readFileSync(registersFilePath, 'utf8'));
 const svFile = fs.createWriteStream(outputSvFilePath);
 svFile.write('package AIGC_DEMO_reg_pkg;\n\n');
 svFile.write('// =============================================================================\n');
-svFile.write('// Register bit field definition\n');
+svFile.write('// Generated Register Block 1.0\n');
+svFile.write(`// Commit ID: ${commitId}\n`);
 svFile.write('// =============================================================================\n\n');
 const AIGC_DEMO_regs_wofields = {};
 function padZeroes(address, width) {
