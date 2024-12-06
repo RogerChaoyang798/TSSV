@@ -21,7 +21,10 @@ const WORD_SIZE = 32;
 const BITS_OF_BYTE = 8;
 const AIGC_DEMO_regs = JSON.parse(fs.readFileSync(registersFilePath, 'utf8'));
 const svFile = fs.createWriteStream(outputSvFilePath);
-svFile.write('package AIGC_DEMO_reg_pkg;\n\n');
+const pkgName = path.basename(outputSvFilePath, path.extname(outputSvFilePath));
+svFile.write(`package ${pkgName};
+
+`);
 svFile.write('// =============================================================================\n');
 svFile.write('// Generated Register Block 1.0\n');
 svFile.write(`// Commit ID: ${commitId}\n`);
@@ -100,7 +103,8 @@ const structsCode = generateAllStructs(AIGC_DEMO_regs);
 svFile.write(structsCode, 'utf8', () => {
     console.log('Packed Written successfully to pkg.sv');
 });
-svFile.write('endpackage : AIGC_DEMO_reg_pkg\n');
+svFile.write(`endpackage : ${pkgName}
+`);
 svFile.end();
 fs.writeFileSync(outputJsonFilePath, JSON.stringify(AIGC_DEMO_regs_wofields, null, 2));
 console.log('Updated JSON with reset values');
