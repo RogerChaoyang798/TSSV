@@ -104,11 +104,12 @@ function generateAllStructs(registers) {
     return result;
 }
 const structsCode = generateAllStructs(AIGC_DEMO_regs);
+
 svFile.write(structsCode, 'utf8', () => {
-    console.log('Packed Written successfully to pkg.sv');
+    svFile.write(`endpackage : ${pkgName}\n`);
+    svFile.end(() => {
+        console.log(`SystemVerilog package written successfully to: ${outputSvFilePath}`);
+    });
 });
-svFile.write(`endpackage : ${pkgName}
-`);
-svFile.end();
 fs.writeFileSync(outputJsonFilePath, JSON.stringify(AIGC_DEMO_regs_wofields, null, 2));
-console.log('Updated JSON with reset values');
+console.log(`Updated JSON with reset values written to: ${outputJsonFilePath}`);
