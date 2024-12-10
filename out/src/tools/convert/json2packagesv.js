@@ -1,15 +1,18 @@
+import { fileURLToPath } from 'url';
 import * as fs from 'fs';
+import { dirname } from 'path';
 import * as path from 'path';
 import { execSync } from 'child_process';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const getCommitId = () => {
     try {
-        return execSync('git rev-parse HEAD').toString().trim();
+      const tssvDir = __dirname;
+      return execSync('git rev-parse HEAD', { cwd: tssvDir }).toString().trim();
+    } catch (err) {
+      console.error('Failed to get Git commit ID:', err.message);
+      return 'unknown_commit';
     }
-    catch (err) {
-        console.error('Failed to get Git commit ID', err);
-        return 'unknown_commit';
-    }
-};
+  };
 const commitId = getCommitId();
 const registersFilePath = process.argv[2];
 const outputSvFilePath = process.argv[3];

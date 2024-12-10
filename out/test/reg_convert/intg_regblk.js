@@ -1,14 +1,17 @@
 import { RegisterBlock } from 'tssv/lib/core/Registers';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const getCommitId = () => {
     try {
-        return execSync('git rev-parse HEAD').toString().trim();
-    }
-    catch (err) {
-        console.error('Failed to get Git commit ID', err);
-        return 'unknown_commit';
+      const tssvDir = __dirname;
+      return execSync('git rev-parse HEAD', { cwd: tssvDir }).toString().trim();
+    } catch (err) {
+      console.error('Failed to get Git commit ID:', err.message);
+      return 'unknown_commit';
     }
 };
 const commitId = getCommitId();
