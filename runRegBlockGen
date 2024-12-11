@@ -1,4 +1,0 @@
-node ./out/src/tools/convert/reg_csv2json.js ./sv-examples/reg_convert/AIGC_DEMO_Reg.csv ./sv-examples/reg_convert/AIGC_DEMO_regMap.json ./sv-examples/reg_convert/AIGC_DEMO_registers.json
-node ./out/src/tools/convert/json2packagesv.js ./sv-examples/reg_convert/AIGC_DEMO_registers.json ./sv-examples/reg_convert/AIGC_DEMO_reg_pkg.sv ./sv-examples/reg_convert/AIGC_DEMO_regs_wofld_repUnfold.json 
-node ./out/test/reg_convert/int_AIGC_DEMO_reg.js ./sv-examples/reg_convert/AIGC_DEMO_regs_wofld_repUnfold.json ./sv-examples/reg_convert/AIGC_DEMO_reg.sv
-cat ./sv-examples/reg_convert/AIGC_DEMO_reg.sv

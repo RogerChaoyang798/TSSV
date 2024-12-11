@@ -6,7 +6,7 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
-#runRegBlockGen
+runRegBlockGen
 .sv
 *.json
 # Local History for Visual Studio Code
