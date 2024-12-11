@@ -1,7 +1,8 @@
 package AIGC_DEMO_reg_pkg;
 
 // =============================================================================
-// Register bit field definition
+// Generated Register Block 1.0
+// Commit ID: 43ac171b50db426673e378dec36af26f70c8a2df
 // =============================================================================
 
 typedef struct packed {
@@ -41,7 +42,7 @@ typedef struct packed {
 } DUMMY_DEBUG_t;
 
 typedef struct packed {
-  logic [31: 0] status_reg;
-} STASUS_REG_t;
+  logic [31: 0] sys_ctrl;
+} SYSCTRL_t;
 
 endpackage : AIGC_DEMO_reg_pkg
