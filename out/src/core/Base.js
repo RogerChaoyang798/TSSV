@@ -1117,7 +1117,6 @@ ${caseAssignments}
                         const resetAssignments = [];
                         Object.keys(regs).forEach((key) => {
                             const reg = regs[key];
-                            // console.log(reg)
                             resetAssignments.push(`           ${key} <= ${this.signals[key]?.width || this.IOs[key]?.width}'h${(reg.resetVal || 0).toString(16).toUpperCase()};`);
                         });
                         resetString =

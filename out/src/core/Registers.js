@@ -55,7 +55,6 @@ export class RegisterBlock extends Module {
                     const WE_Sig = this.addSignal(`${regName}_WE`, { width: 1 });
                     this.addAssign({ in: new Expr(`${matchSig.toString()} && regs.RE`), out: RE_Sig });
                     this.addAssign({ in: new Expr(`${matchSig.toString()} && regs.WE`), out: WE_Sig });
-                    // new code
                     this.addAssign({ in: new Expr('regs.WSTRB'), out: wstrb });
                     if (thisReg.fields && Object.keys(thisReg.fields).length > 0) {
                         Object.keys(thisReg.fields).forEach((fieldName, index) => {
@@ -86,7 +85,7 @@ export class RegisterBlock extends Module {
                         this.addSignal(`${regName}_d`, { width: regDefs.wordSize });
                         this.addAssign({ in: new Expr(`regs.DATA_WR & ${wstrb.toString()}`), out: `${regName}_d` });
                         this.addRegister({
-                            d: 'regs.DATA_WR', // added & wstrb
+                            d: 'regs.DATA_WR',
                             clk: 'clk',
                             reset: 'rst_b',
                             q: regName.toString(),
@@ -109,7 +108,6 @@ export class RegisterBlock extends Module {
                 else if (thisReg.type === 'WO') {
                     const wstrbWidth = (params.busAddressWidth || 8) / 8;
                     const wstrb = this.addSignal(`${regName}_wstrb`, { width: wstrbWidth });
-                    // Use original address for logic
                     this.addAssign({ in: new Expr(`regs.ADDR == ${baseAddr}`), out: matchSig });
                     this.addAssign({ in: new Expr('regs.WSTRB'), out: wstrb });
                     const WE_Sig = this.addSignal(`${regName}_WE`, { width: 1 });
@@ -340,7 +338,7 @@ export class RegisterBlock extends Module {
             this.body += '// apb interface\n';
             if (useComb) {
                 this.addCombAlways({
-                    outputs: ['reg_wr', 'reg_rd', 'regs.PREADY', 'regs.PSTRB']
+                    outputs: ['reg_wr', 'reg_rd', 'reg_addr', 'reg_wdata', 'regs.PRDATA', 'regs.PREADY', 'regs.PREADY']
                 }, `begin
 reg_wr = regs.PSELx && regs.PENABLE && regs.PWRITE;
 reg_rd = regs.PSELx && !regs.PENABLE && !regs.PWRITE;
@@ -429,13 +427,6 @@ end
                         en: SC_Sig,
                         resetVal: thisReg.reset || 0n
                     });
-                    this.addRegister({
-                        d: SC_Sig,
-                        clk: 'clk',
-                        reset: 'rst_b',
-                        q: SC_Sig,
-                        resetVal: 0n
-                    });
                 }
                 else if (thisReg.type === 'RO') {
                     this.IOs['cfg_' + regName.toString()] = {
@@ -483,8 +474,12 @@ end
             let next_rdataExpr = new Expr('');
             const inRange = this.addSignal('in_range', { width: 1 });
             let inRangeExpr = new Expr('');
+            const clrzero = this.addSignal('clrzero', { width: 1 });
+            this.addAssign({ in: new Expr('1\'b0'), out: clrzero });
+            const clrone = this.addSignal('clrone', { width: 1 });
+            this.addAssign({ in: new Expr('1\'b1'), out: clrone });
             const clrzeros = this.addSignal('clrzeros', { width: regDefs.wordSize || 32 });
-            this.addAssign({ in: new Expr(`${regDefs.wordSize || 32}'h0`), out: 'clrzeros' });
+            this.addAssign({ in: new Expr(`${regDefs.wordSize || 32}'h0`), out: clrzeros });
             this.body += '// apb interface\n';
             this.addCombAlways({
                 outputs: ['reg_wr', 'reg_rd', 'reg_addr', 'reg_wdata', 'prdata', 'pready']
@@ -569,10 +564,19 @@ end
                         resetVal: thisReg.reset || 0n
                     });
                     this.addRegister({
-                        d: SC_Sig,
+                        d: clrone,
                         clk: 'clk',
                         reset: 'rst_b',
                         q: SC_Sig,
+                        en: WE_Sig,
+                        resetVal: 0n
+                    });
+                    this.addRegister({
+                        d: clrzero,
+                        clk: 'clk',
+                        reset: 'rst_b',
+                        q: SC_Sig,
+                        en: SC_Sig,
                         resetVal: 0n
                     });
                 }
