@@ -1195,8 +1195,7 @@ ${signalString}
 
 ${this.body}
 
-endmodule
-`;
+endmodule`;
         return verilog;
     }
     writeVerilog() {
@@ -1364,8 +1363,7 @@ ${signalString}
 
 ${this.body}
 
-endmodule   
-`;
+endmodule`;
         return verilog;
     }
 }

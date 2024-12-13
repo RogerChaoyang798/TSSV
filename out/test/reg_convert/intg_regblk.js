@@ -123,7 +123,7 @@ function generateSVerilog(testRegBlock, outputSvFilePath) {
 
 // Commit ID: ${commitId}
 ` +
-        adjustedVerilog + ` : ${testRegBlock.name}_pkg
+        adjustedVerilog + ` : ${testRegBlock.name}
 `;
     fs.writeFileSync(outputSvFilePath, adjustedVerilog);
 }
@@ -139,7 +139,7 @@ function generateVerilog(testRegBlock, outVFilePath) {
 
 // Commit ID: ${commitId}
 ` +
-        adjustedVerilog + ` : ${testRegBlock.name}_pkg
+        adjustedVerilog + ` : ${testRegBlock.name}
 `;
     fs.writeFileSync(outVFilePath, adjustedVerilog);
 }
