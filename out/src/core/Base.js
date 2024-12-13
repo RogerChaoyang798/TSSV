@@ -1195,7 +1195,8 @@ ${signalString}
 
 ${this.body}
 
-endmodule`;
+endmodule
+`;
         return verilog;
     }
     writeVerilog() {
@@ -1354,7 +1355,6 @@ ${bindingsArray.join(',\n')}
 ${interfacesString}        
 ${subModulesString}
         
-/* verilator lint_off WIDTH */        
 module ${this.name} ${paramsString}
    (
 ${IOString}
@@ -1364,8 +1364,7 @@ ${signalString}
 
 ${this.body}
 
-endmodule
-/* verilator lint_on WIDTH */        
+endmodule   
 `;
         return verilog;
     }
