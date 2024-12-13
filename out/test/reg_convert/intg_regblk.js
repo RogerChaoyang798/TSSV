@@ -95,7 +95,7 @@ function createRegisters(regs) {
 //     console.error(err);
 // }
 function modifySignalTypes(content, wordSize) {
-    const dynamicPattern = new RegExp(`^logic\s+\[${myRegs.wordSize - 1}:0\]\s+(reg_[A-Z0-9][A-Za-z0-9_]*)\s*`);
+    const dynamicPattern = new RegExp(`^logic\s+\[${wordSize - 1}:0\]\s+(reg_[A-Z0-9][A-Za-z0-9_]*)\s*`);
     return content
         .split('\n')
         .map(line => {
@@ -118,9 +118,12 @@ function generateSVerilog(testRegBlock, outputSvFilePath) {
     adjustedVerilog = `${importStatement}
 
 // =============================================================================
-// Register module
+// Generated Register Block 1.0
 // =============================================================================
-${adjustedVerilog} : ${testRegBlock.name}_pkg
+
+// Commit ID: ${commitId}
+` +
+        adjustedVerilog + ` : ${testRegBlock.name}_pkg
 `;
     fs.writeFileSync(outputSvFilePath, adjustedVerilog);
 }
@@ -131,9 +134,12 @@ function generateVerilog(testRegBlock, outVFilePath) {
     adjustedVerilog = `${importStatement}
 
 // =============================================================================
-// Register module
+// Generated Register Block 1.0
 // =============================================================================
-${adjustedVerilog} : ${testRegBlock.name}_pkg
+
+// Commit ID: ${commitId}
+` +
+        adjustedVerilog + ` : ${testRegBlock.name}_pkg
 `;
     fs.writeFileSync(outVFilePath, adjustedVerilog);
 }
