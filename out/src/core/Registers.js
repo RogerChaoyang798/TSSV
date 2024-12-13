@@ -465,22 +465,18 @@ end
                 pslverr: { direction: 'output', width: 1 }
             };
             // Create signals and logic for this register block
-            const reg_rd = this.addSignal('reg_rd', { width: 1 });
-            const reg_wr = this.addSignal('reg_wr', { width: 1 });
-            const reg_addr = this.addSignal('reg_addr', { width: params.busAddressWidth || 12 });
-            const reg_rdata = this.addSignal('reg_rdata', { width: regDefs.wordSize || 32 });
-            const reg_wdata = this.addSignal('reg_wdata', { width: regDefs.wordSize || 32 });
-            const next_rdata = this.addSignal('next_rdata', { width: regDefs.wordSize || 32 });
+            const reg_rd = this.addSignal('reg_rd', { width: 1, type: 'wire' });
+            const reg_wr = this.addSignal('reg_wr', { width: 1, type: 'wire' });
+            const reg_addr = this.addSignal('reg_addr', { width: params.busAddressWidth || 12, type: 'wire' });
+            const reg_rdata = this.addSignal('reg_rdata', { width: regDefs.wordSize || 32, type: 'reg' });
+            const reg_wdata = this.addSignal('reg_wdata', { width: regDefs.wordSize || 32, type: 'wire' });
+            const next_rdata = this.addSignal('next_rdata', { width: regDefs.wordSize || 32, type: 'wire' });
             let next_rdataExpr = new Expr('');
-            const inRange = this.addSignal('in_range', { width: 1 });
+            const inRange = this.addSignal('in_range', { width: 1, type: 'wire' });
             let inRangeExpr = new Expr('');
-            const clrzero = this.addSignal('clrzero', { width: 1 });
-            this.addAssign({ in: new Expr('1\'b0'), out: clrzero });
-            const clrone = this.addSignal('clrone', { width: 1 });
-            this.addAssign({ in: new Expr('1\'b1'), out: clrone });
-            const clrzeros = this.addSignal('clrzeros', { width: regDefs.wordSize || 32 });
-            this.addAssign({ in: new Expr(`${regDefs.wordSize || 32}'h0`), out: clrzeros });
+            const useComb = false;
             this.body += '// apb interface\n';
+            if (useComb) {
             this.addCombAlways({
                 outputs: ['reg_wr', 'reg_rd', 'reg_addr', 'reg_wdata', 'prdata', 'pready']
             }, `begin
@@ -494,7 +490,16 @@ pready = 1'b1;
 end
 
 `);
-            this.addSignal('slverr', { width: 1 });
+            }
+            else {
+                this.addAssign({ in: new Expr('psel && penable && pwrite'), out: reg_wr });
+                this.addAssign({ in: new Expr('psel && !penable && !pwrite'), out: reg_rd });
+                this.addAssign({ in: new Expr('paddr'), out: reg_addr });
+                this.addAssign({ in: new Expr('pwdata'), out: reg_wdata });
+                this.addAssign({ in: new Expr(reg_rdata.toString()), out: 'prdata' });
+                this.addAssign({ in: new Expr('1\'b1'), out: 'pready' });
+            }
+            this.addSignal('slverr', { width: 1, type: 'wire' });
             this.addAssign({ in: new Expr('psel && !in_range'), out: 'slverr' });
             this.addRegister({
                 d: 'slverr',
@@ -515,11 +520,11 @@ end
                 if (registers[reg] !== undefined) {
                     thisReg = registers[reg] || thisReg;
                 }
-                const matchSig = this.addSignal(`dec_${regName}`, { width: 1 });
+                const matchSig = this.addSignal(`dec_${regName}`, { width: 1, type: 'wire' });
                 this.addAssign({ in: new Expr(`(reg_addr == ${params.busAddressWidth}'h${this.padZeroes(baseAddr.toString(16).toUpperCase(), (params.busAddressWidth || 32) / 4)}) ? 1'd1 : 1'd0`), out: matchSig });
-                const pkSig = this.addSignal(`reg_${regName}`, { width: regDefs.wordSize || 32 });
+                const pkSig = this.addSignal(`reg_${regName}`, { width: regDefs.wordSize || 32, type: (thisReg.type === 'RO') ? 'wire' : 'reg' });
                 if (thisReg.type === 'RW') {
-                    const WE_Sig = this.addSignal(`${regName}_we`, { width: 1 });
+                    const WE_Sig = this.addSignal(`${regName}_we`, { width: 1, type: 'wire' });
                     this.addAssign({ in: new Expr(`reg_wr && ${matchSig.toString()}`), out: WE_Sig });
                     this.IOs['cfg_' + regName.toString()] = {
                         direction: 'output',
@@ -537,8 +542,8 @@ end
                     });
                 }
                 else if (thisReg.type === 'WO') {
-                    const SC_Sig = this.addSignal(`${regName}_sc`, { width: 1 });
-                    const WE_Sig = this.addSignal(`${regName}_we`, { width: 1 });
+                    const SC_Sig = this.addSignal(`${regName}_sc`, { width: 1, type: 'reg' });
+                    const WE_Sig = this.addSignal(`${regName}_we`, { width: 1, type: 'wire' });
                     this.addAssign({ in: new Expr(`reg_wr && ${matchSig.toString()}`), out: WE_Sig });
                     this.IOs[`cfg_${regName}`] = {
                         direction: 'output',
@@ -556,7 +561,7 @@ end
                         resetVal: thisReg.reset || 0n
                     });
                     this.addRegister({
-                        d: clrzeros,
+                        d: `${regDefs.wordSize || 32}'b0`,
                         clk: 'clk',
                         reset: 'rst_b',
                         q: pkSig,
@@ -564,7 +569,7 @@ end
                         resetVal: thisReg.reset || 0n
                     });
                     this.addRegister({
-                        d: clrone,
+                        d: '1\'b1',
                         clk: 'clk',
                         reset: 'rst_b',
                         q: SC_Sig,
@@ -572,7 +577,7 @@ end
                         resetVal: 0n
                     });
                     this.addRegister({
-                        d: clrzero,
+                        d: '1\'b0',
                         clk: 'clk',
                         reset: 'rst_b',
                         q: SC_Sig,
@@ -581,6 +586,7 @@ end
                     });
                 }
                 else if (thisReg.type === 'RO') {
+
                     this.IOs['cfg_' + regName.toString()] = {
                         direction: 'input',
                         width: thisReg.width || regDefs.wordSize,
