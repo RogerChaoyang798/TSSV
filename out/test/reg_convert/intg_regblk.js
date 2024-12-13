@@ -39,81 +39,30 @@ function createRegisters(regs) {
         return acc;
     }, {});
 }
-// const regs = JSON.parse(fs.readFileSync(regsPath, 'utf8'));
-// const myRegMap = Object.entries(regs).reduce((acc, [regName, regDetails]) => {
-//     acc[regName] = BigInt(regDetails.startAddr);
-//     return acc;
-// }, {});
-// const registers = {};
-// for (const [regName, regData] of Object.entries(regs)) {
-//     registers[regName] = {
-//         type: regData.type,
-//         reset: BigInt(regData.reset),
-//         description: regData.description
-//     };
-// }
-// const myRegs = {
-//     wordSize: 32,
-//     addrMap: myRegMap,
-//     registers
-// };
-
-
-
-// try {
-//     const modifySignalTypes = (content) => {
-//         const dynamicPattern = new RegExp(`^logic\s+\[${myRegs.wordSize - 1}:0\]\s+(reg_[A-Z0-9][A-Za-z0-9_]*)\s*`);
-//         return content
-//             .split('\n')
-//             .map(line => {
-//             const trimmedLine = line.trim();
-//             const match = trimmedLine.match(dynamicPattern);
-//             if (match) {
-//                 const signalName = match[1];
-//                 return trimmedLine.replace(dynamicPattern, `${signalName}_t ${signalName};`);
-//             }
-//             return trimmedLine;
-//         })
-//             .join('\n');
-//     };
-//     const rawVerilog = testRegBlock.writeSystemVerilog();
-//     let adjustedVerilog = modifySignalTypes(rawVerilog);
-//     const importStatement = `import ${testRegBlock.name}_pkg::*;`;
-//     adjustedVerilog = `${importStatement}
-
-// // =============================================================================
-// // Generated Register Block 1.0
-// // =============================================================================
-
-// // Commit ID: ${commitId}
-// ` +
-//         adjustedVerilog + ` : ${testRegBlock.name}_pkg
-// `;
-//     fs.writeFileSync(outputSvFilePath, adjustedVerilog);
-// }
-// catch (err) {
-//     console.error(err);
-// }
-function modifySignalTypes(content, wordSize) {
-    const dynamicPattern = new RegExp(`^logic\s+\[${wordSize - 1}:0\]\s+(reg_[A-Z0-9][A-Za-z0-9_]*)\s*`);
+function modifySignalTypes(content, wordSize, regs) {
+    // const dynamicPattern = new RegExp(
+    //   `^logic\\s+\\[${wordSize - 1}:0\\]\\s+(reg_[a-z0-9][a-z0-9_]*)\\s*`
+    // )
     return content
         .split('\n')
         .map(line => {
         const trimmedLine = line.trim();
         if (!(trimmedLine.includes('reg_wdata') || trimmedLine.includes('*reg_rdata*'))) {
-            const match = trimmedLine.match(dynamicPattern);
-            if (match) {
-                const signalName = match[1];
-                return trimmedLine.replace(dynamicPattern, `${signalName}_t ${signalName};`);
+            for (const [key, reg] of Object.entries(regs)) {
+                const keyPattern = `reg_${key.toLowerCase()}`;
+                if (trimmedLine.includes(keyPattern)) {
+                    // const signalName = reg.packName
+                    return trimmedLine.replace(`logic [${wordSize - 1}:0]`, reg.packName);
+                }
             }
         }
         return trimmedLine;
     })
         .join('\n');
 }
-function generateSVerilog(testRegBlock, outputSvFilePath) {
+function generateSVerilog(testRegBlock, outputSvFilePath, regs) {
     const rawVerilog = testRegBlock.writeSystemVerilog();
-    let adjustedVerilog = modifySignalTypes(rawVerilog, WORD_SIZE);
+    let adjustedVerilog = modifySignalTypes(rawVerilog, WORD_SIZE, regs);
     const importStatement = `import ${testRegBlock.name}_pkg::*;`;
     adjustedVerilog = `${importStatement}
 
@@ -128,20 +77,16 @@ function generateSVerilog(testRegBlock, outputSvFilePath) {
     fs.writeFileSync(outputSvFilePath, adjustedVerilog);
 }
 function generateVerilog(testRegBlock, outVFilePath) {
-    const rawVerilog = testRegBlock.writeVerilog();
-    let adjustedVerilog = modifySignalTypes(rawVerilog, WORD_SIZE);
+    let rawVerilog = testRegBlock.writeVerilog();
     const importStatement = `import ${testRegBlock.name}_pkg::*;`;
-    adjustedVerilog = `${importStatement}
+    rawVerilog = `${importStatement}
 
 // =============================================================================
 // Generated Register Block 1.0
 // =============================================================================
-
-// Commit ID: ${commitId}
-` +
-        adjustedVerilog + ` : ${testRegBlock.name}
+${rawVerilog} : ${testRegBlock.name}
 `;
-    fs.writeFileSync(outVFilePath, adjustedVerilog);
+    fs.writeFileSync(outVFilePath, rawVerilog);
 }
 function main() {
     const regsPath = process.argv[2];
@@ -167,9 +112,8 @@ function main() {
         name: regName,
         busAddressWidth: 12
     }, myRegs, {});
-
     try {
-        generateSVerilog(testRegBlock, outputSvFilePath);
+        generateSVerilog(testRegBlock, outputSvFilePath, regs);
         generateVerilog(testRegBlockV, outVFilePath);
         console.log(`SystemVerilog file generated successfully: ${outputSvFilePath}`);
         console.log(`Verilog file generated successfully: ${outVFilePath}`);

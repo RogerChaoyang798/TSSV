@@ -90,21 +90,21 @@ function generateAllStructs(registers) {
     Object.keys(registers).forEach(key => {
         let { startAddr, repeat, fields, ...rest } = registers[key];
         const registerStartAddr = parseInt(startAddr, 16);
+        const packName = `${key}_t`;
         if (repeat && repeat > 1) {
             for (let i = 0; i < repeat; i++) {
                 const newRegisterName = `${key}_${i}`;
                 startAddr = `0x${(registerStartAddr + i * WORD_SIZE / BITS_OF_BYTE).toString(16)}`;
-                AIGC_DEMO_regs_wofields[newRegisterName] = { startAddr, ...rest };
+                AIGC_DEMO_regs_wofields[newRegisterName] = { startAddr, packName, ...rest };
             }
         }
         else {
-            AIGC_DEMO_regs_wofields[key] = { startAddr, ...rest };
+            AIGC_DEMO_regs_wofields[key] = { startAddr, packName, ...rest };
         }
     });
     return result;
 }
 const structsCode = generateAllStructs(AIGC_DEMO_regs);
-
 svFile.write(structsCode, 'utf8', () => {
     svFile.write(`endpackage : ${pkgName}\n`);
     svFile.end(() => {
