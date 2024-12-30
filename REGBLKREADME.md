@@ -13,6 +13,8 @@ cd TSSV
 bsub -q be -Is /home/runzhe.liu/tssv2redzone/tssvRegBlk /home/runzhe.liu/tssv2redzone/sv-examples/reg_convert/AIGC_DEMO_Reg.csv 
 ```
 
+生成的SV文件和RALF仍在输入文件所在的目录。
+
 在运行上述命令之前，修改其中的寄存器表格路径.参考/home/runzhe.liu/tssv2redzone/sv-examples/reg_convert/AIGC_DEMO_Reg.csv.
 
 表头如下
