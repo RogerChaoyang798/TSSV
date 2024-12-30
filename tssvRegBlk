@@ -1,5 +1,5 @@
 #!/bin/bash
-#module add node/22.9.0
+module add node/22.9.0
 TSSV_DIR=$(dirname "$0")
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <csv_file>"
