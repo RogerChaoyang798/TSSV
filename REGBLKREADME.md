@@ -1,8 +1,11 @@
 # TSSV  Integrate Register Block
 
 Only Javascripts are provided for use to integrate register block.
+
+```bash
 git clone git@192.168.90.119:runzhe.liu/tssv2redzone.git
 cd TSSV
+```
 
 ### Run the flow
 此flow用于生成SV文件和RALF文件。
