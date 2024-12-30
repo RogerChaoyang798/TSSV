@@ -1,4 +1,4 @@
-Block Name,Offset,Register Name,Offset,Access Mode,Repeat,Register Description,Field,Bits,Access Type,Reset Value,HDL Path,Field Description,Write Out,
+Block Name,Block Offset,Register Name,Register Offset,Access Mode(RW/RO/WO/W1C/W1T/W1S),Repeat,Register Description,Field,Bits,Access Type(RW/RO/WO/W1C/W1T/W1S),Reset Value,HDL Path,Field Description,Write Out,
 control,0x00000000,,,,,,,,,,,,,
 ,,UNIT_ID,0x00,RO,,ID register,,,,,reg_HX_AIGC_DEMO_REG_unit_id,,,
 ,,,,,,,ID,31:0,RO,0x1,,unit ID,,
