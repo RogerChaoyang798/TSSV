@@ -11,6 +11,7 @@ bsub -q be -Is /home/runzhe.liu/tssv2redzone/tssvRegBlk /home/runzhe.liu/tssv2re
 ```
 
 在运行runRegBlock之前，修改其中的寄存器表格路径.参考/home/runzhe.liu/sv-examples/reg_convert/AIGC_DEMO_Reg.csv.
+
 表头如下
 Block Name,Block Offset,Register Name,Register Offset,Access Mode(RW/RO/WO/W1C/W1T/W1S),Repeat,Register Description,Field,Bits,Access Type(RW/RO/WO/W1C/W1T/W1S),Reset Value,HDL Path,Field Description,Write Out,
 
