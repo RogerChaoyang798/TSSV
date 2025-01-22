@@ -14,7 +14,7 @@ bsub -q be -Is /home/runzhe.liu/tssv2redzone/tssvRegBlk /home/runzhe.liu/tssv2re
 ```
 由于需要Node和gcc环境，如果不采用提交作业的方法，
 ```bash
-/home/runzhe.liu/tssv2redzone/sv-examples/reg_convert/AIGC_DEMO_Reg.csv
+/home/runzhe.liu/tssv2redzone/tssvRegBlk /home/runzhe.liu/tssv2redzone/sv-examples/reg_convert/AIGC_DEMO_Reg.csv
 ```
 ，可能出错。
 ```bash
