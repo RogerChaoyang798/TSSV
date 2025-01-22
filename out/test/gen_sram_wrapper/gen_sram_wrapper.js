@@ -29,6 +29,17 @@ function processOriginationUnfolds(sramConfig) {
                 remainingWidth -= origination.width;
             }
         }
+        else if (origination.type === 'REG') {
+            const unfold = {
+                ...origination,
+                width: origination.width,
+                depth: BigInt(origination.depth),
+                instName: `u_reg_${instCounter++}`,
+                bitBig: remainingWidth
+            };
+            unfolds.push(unfold);
+            remainingWidth -= origination.width;
+        }
     }
     console.log(unfolds);
     return unfolds;
@@ -79,19 +90,10 @@ function generateSramWrapper(config) {
             module: origination.module,
             width: origination.width,
             depth: origination.depth,
-            bitBig: origination.bitBig
+            bitBig: origination.bitBig,
+            type: origination.type
         }))
     });
-    // config.originationUnfold.forEach(origination => {
-    //   const subSram = new SRAM_WRAPPER({
-    //     name: `${origination.module}`,
-    //     dataWidth: origination.width,
-    //     depth: origination.depth,
-    //     ports,
-    //     writeEnableMask
-    //   })
-    // wrapper.addSubmodule(origination.instName, subSram, {}, true, true, true)
-    // })
     return wrapper.writeVerilog();
 }
 function ensureFileExists(filePath) {

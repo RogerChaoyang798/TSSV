@@ -39,6 +39,7 @@ export class SRAM_WRAPPER extends Module {
     instantiateSubSrams() {
         const DOut_list = [];
         this.subSrams.forEach(sram => {
+            if (sram.type === 'SRAM') {
             const DOut_sub = this.addSignal(`DOUT_${sram.instName.toUpperCase()}`, { width: sram.width, type: 'wire' });
             const DI_sub = this.addSignal(`DI_${sram.instName.toUpperCase()}`, { width: sram.width, type: 'wire' });
             if (sram.bitBig >= (sram.width - 1)) {
@@ -49,7 +50,6 @@ export class SRAM_WRAPPER extends Module {
                 this.addAssign({ in: new Expr(`{DI[${sram.bitBig}:0], ${sram.width - 1 - sram.bitBig}'d0}`), out: DI_sub });
                 DOut_list.push(`${DOut_sub.toString()}[${sram.width - 1}:${sram.width - 1 - sram.bitBig}]`);
             }
-            // this.subSrams.forEach(sram => {
                 this.addSubmodule(sram.instName, new Module({
                     name: sram.module
                 }, {
@@ -65,7 +65,26 @@ export class SRAM_WRAPPER extends Module {
                     RET: { direction: 'input', width: 1 },
                     ADME: { direction: 'input', width: 3 }
                 }), { DI: DI_sub, DOUT: DOut_sub }, true, true, true);
-            // });
+            }
+            else if (sram.type === 'REG') {
+                this.body +=
+                    `
+reg  [${sram.width - 1}:0]      DI_REG_0 [${sram.depth - 1n}:0];
+reg  [${sram.width - 1}:0]      DOUT_REG_0;
+always @(posedge CK) begin
+    if (~WEN) begin
+        DI_REG_0[WA] <= DI[${sram.width - 1}:0];
+    end
+end
+
+always @(posedge CK) begin
+    if (~REN) begin
+        DOUT_REG_0 <= DI_REG_0[RA];
+    end
+end
+`;
+                DOut_list.push('DOUT_REG_0');
+            }
         });
         this.addAssign({ in: new Expr(`{${DOut_list.join(', ')}}`), out: 'DOUT' });
     }
