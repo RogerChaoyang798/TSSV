@@ -4,7 +4,7 @@ import { SRAM_WRAPPER } from 'tssv/lib/modules/SRAM_WRAPPER';
 function parseSramData(sramPath) {
     const sramConfigs = JSON.parse(fs.readFileSync(sramPath, 'utf8'));
     Object.values(sramConfigs).forEach(sramConfig => {
-        sramConfig.name = `${sramConfig.sram_type}_${sramConfig.width}x${sramConfig.depth}${sramConfig.muxBankCd}${sramConfig.suffix}`;
+        sramConfig.name = `${sramConfig.sram_type}_${sramConfig.depth}x${sramConfig.width}${sramConfig.muxBankCd}${sramConfig.suffix}`;
         const unfoldedOrigination = processOriginationUnfolds(sramConfig);
         sramConfig.originationUnfold = unfoldedOrigination;
     });
@@ -85,13 +85,16 @@ function generateSramWrapper(config) {
         depth: BigInt(config.depth),
         ports,
         writeEnableMask,
+        split_direction: config.split_direction,
         subSrams: config.originationUnfold.map(origination => ({
             instName: origination.instName,
             module: origination.module,
             width: origination.width,
             depth: origination.depth,
             bitBig: origination.bitBig,
-            type: origination.type
+            type: origination.type,
+            adr_mask: origination.adr_mask,
+            en_ptn: origination.en_ptn
         }))
     });
     return wrapper.writeVerilog();
