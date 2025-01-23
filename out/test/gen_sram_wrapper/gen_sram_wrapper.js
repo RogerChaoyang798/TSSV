@@ -4,7 +4,7 @@ import { SRAM_WRAPPER } from 'tssv/lib/modules/SRAM_WRAPPER';
 function parseSramData(sramPath) {
     const sramConfigs = JSON.parse(fs.readFileSync(sramPath, 'utf8'));
     Object.values(sramConfigs).forEach(sramConfig => {
-        sramConfig.name = `${sramConfig.sram_type}_${sramConfig.width}x${sramConfig.depth}${sramConfig.muxBankCd}${sramConfig.suffix}`;
+        sramConfig.name = `${sramConfig.sram_type}_${sramConfig.depth}x${sramConfig.width}${sramConfig.muxBankCd}${sramConfig.suffix}`;
         const unfoldedOrigination = processOriginationUnfolds(sramConfig);
         sramConfig.originationUnfold = unfoldedOrigination;
     });
