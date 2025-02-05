@@ -15,9 +15,6 @@ const getCommitId = () => {
     }
 };
 const commitId = getCommitId();
-// const regsPath = process.argv[2];
-// const outputSvFilePath = process.argv[3];
-// const regName = path.basename(outputSvFilePath, path.extname(outputSvFilePath));
 
 const WORD_SIZE = 32;
 function parseRegisterData(regsPath) {

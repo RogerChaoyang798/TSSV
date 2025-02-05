@@ -1,5 +1,3 @@
-
-
 #!/bin/bash
 TSSV_DIR=$(dirname "$0")
 rm "$TSSV_DIR/sv-examples/test_memWrapper/ln05lpe_a00_mc_rd2r_hsr_lvt_1026x256m2b1c0_wrapper_WRP1_I0O0_wrapper.v"
