@@ -14,6 +14,6 @@ RALF="$path/${name}.ralf"
 node "$TSSV_DIR/out/src/tools/convert/reg_csv2json.js" "$CSV_FILE" "$REG_MAP_JSON" "$REGS_JSON"
 "$TSSV_DIR/out/src/tools/convert/csv2ralf.py" "$CSV_FILE" "$RALF"
 node "$TSSV_DIR/out/src/tools/convert/json2packagesv.js" "$REGS_JSON" "$path/${name}_pkg.sv" "$path/${name}_wofld_repUnfold.json" 
-node "$TSSV_DIR/out/test/reg_convert/intg_regblk.js" "$path/${name}_wofld_repUnfold.json" "$path/${name}.sv"
+node "$TSSV_DIR/out/test/reg_convert/intg_regblk.js" "$path/${name}_wofld_repUnfold.json" "$path/${name}.sv" $1
 
 rm "$REG_MAP_JSON" "$REGS_JSON" "$path/${name}_wofld_repUnfold.json"

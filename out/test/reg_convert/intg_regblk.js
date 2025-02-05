@@ -91,6 +91,7 @@ ${rawVerilog} : ${testRegBlock.name}
 function main() {
     const regsPath = process.argv[2];
     const outputSvFilePath = process.argv[3];
+    const busAddrW = process.argv[4];
     const regName = path.basename(outputSvFilePath, path.extname(outputSvFilePath));
 
     const outVFilePath = outputSvFilePath.replace('.sv', '.v');
@@ -105,12 +106,12 @@ function main() {
     };
     const testRegBlock = new RegisterBlock({
         name: regName,
-        busAddressWidth: 12
+        busAddressWidth: busAddrW
     }, myRegs, {});
     
     const testRegBlockV = new RegisterBlock({
         name: regName,
-        busAddressWidth: 12
+        busAddressWidth: busAddrW
     }, myRegs, {});
     try {
         generateSVerilog(testRegBlock, outputSvFilePath, regs);
