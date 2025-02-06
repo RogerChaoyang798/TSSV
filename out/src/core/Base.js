@@ -1279,9 +1279,7 @@ end
             const { definitions, instantiations } = this.assembleSubmodules();
             const verilog = `
         ${interfacesString}        
-        ${definitions}
-                
-        /* verilator lint_off WIDTH */        
+        ${definitions}        
         module ${this.name} ${paramsString}
            (
         ${IOString}
@@ -1295,8 +1293,7 @@ end
     
         ${regBlksReorderString}
         
-        endmodule
-        /* verilator lint_on WIDTH */        
+        endmodule        
         `;
             return verilog;
         }
@@ -1692,4 +1689,4 @@ export function deserialize(serialized) {
     return revived;
 }
 export default { Module, Sig, Expr };
-
+*/
