@@ -449,6 +449,7 @@ export class Module {
                     qSig.type = 'logic';
                     break;
                 case 'reg':
+                // case 'output reg':
                 case 'logic':
                     break;
                 default:
@@ -1068,7 +1069,11 @@ ${caseAssignments}
                 IOArray.push(`${io.direction} ${io.type || 'logic'}${signString} ${rangeString} ${key}`);
             }
             else {
-                IOArray.push(`${this.IOs[key].direction} ${signString} ${rangeString} ${key}`);
+                if (io.type === 'reg') {
+                    IOArray.push(`${this.IOs[key].direction} ${io.type} ${signString} ${rangeString} ${key}`);
+                } else {
+                    IOArray.push(`${this.IOs[key].direction} ${signString} ${rangeString} ${key}`);
+                }
             }
         });
         Object.entries(this.interfaces).forEach(([key, thisInterface]) => {

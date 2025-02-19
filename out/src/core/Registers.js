@@ -560,7 +560,7 @@ end
                 penable: { direction: 'input', width: 1 },
                 pwrite: { direction: 'input', width: 1 },
                 pready: { direction: 'output', width: 1 },
-                pslverr: { direction: 'output', width: 1 }
+                pslverr: { direction: 'output', width: 1, type: 'reg' }
             };
             // Create signals and logic for this register block
             const reg_rd = this.addSignal('reg_rd', { width: 1, type: 'wire' });
