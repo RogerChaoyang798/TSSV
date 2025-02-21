@@ -12,6 +12,9 @@ cd TSSV
 ```bash
 bsub -q be -Is /home/runzhe.liu/tssv2redzone/runSramWrapper /home/runzhe.liu/tssv2redzone/sv-examples/test_memWrapper/sram_config1.json 
 ```
+
+如将wrapper沿depth方向切分，需要指定address mask和en_ptn，参考/sv-examples/test_memWrapper/sram_config4.json文件
+
 由于需要Node和gcc环境，如果不采用提交作业的方法，
 ```bash
 /home/runzhe.liu/tssv2redzone/runSramWrapper /home/runzhe.liu/tssv2redzone/sv-examples/test_memWrapper/sram_config1.json 
