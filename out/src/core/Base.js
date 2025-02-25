@@ -1335,6 +1335,10 @@ end
         }
     }
     Module.printedInterfaces = {};
+    export function extractNumberFromPattern(pattern) {
+        const match = pattern.match(/^(\d+)'/);
+        return match ? parseInt(match[1], 10) : null;
+    }
     export function serialize(obj, indent, bigIntSuffix = 'n') {
         const serialized = JSON.stringify(obj, function (key, value) {
             if (typeof value === 'bigint') {
