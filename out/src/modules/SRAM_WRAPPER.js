@@ -86,6 +86,7 @@ export class SRAM_WRAPPER extends Module {
                     throw new Error(`Invalid enable pattern for SRAM ${sram.instName}: ${sram.en_ptn}`);
                 }
                 this.addAssign({ in: new Expr(`RA & ${sram.adr_mask}`), out: RA_sub });
+                this.addAssign({ in: new Expr(`WA & ${sram.adr_mask}`), out: WA_sub });
                 this.addAssign({ in: new Expr(`${DOut_sub.toString()} & {${sram.width}{${REN_D0_sub.toString()}}}`), out: DOut_tmp });
                 this.addRegister({
                     d: new Expr(`~${REN_sub.toString()}`),
