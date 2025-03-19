@@ -76,6 +76,14 @@ function generateSramWrapper(config) {
             ports = 'RF2_HS';
             writeEnableMask = 'bit';
             break;
+        case 'ln05lpe_a00_mc_ra1r_hsr_lvt':
+            ports = 'RA1_HS';
+            writeEnableMask = 'none';
+            break;
+        case 'ln05lpe_a00_mc_ra1rw_hsr_lvt':
+            ports = 'RA1_HS';
+            writeEnableMask = 'bit';
+            break;    
         default:
             throw new Error(`Unsupported SRAM type: ${config.sram_type}`);
     }
