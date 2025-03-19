@@ -26,7 +26,7 @@ Fatal: kernel too old
 生成的V文件和sram_list仍在输入文件所在的目录。
 
 在运行上述命令之前，修改其中的Wrapper Configuration路径.
-输入文件格式参考/home/runzhe.liu/TSSV/sv-examples/test_memWrapper/sram_config1~4.json.
+输入文件格式参考/home/runzhe.liu/tssv2redzone/sv-examples/test_memWrapper/sram_config1~4.json.
 
 
 
