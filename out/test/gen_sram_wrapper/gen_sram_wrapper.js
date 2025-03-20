@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import path from 'path';
 import { SRAM_WRAPPER } from 'tssv/lib/modules/SRAM_WRAPPER';
+import { extractModuleImpl, removeParameter } from 'tssv/lib/tools/convert/verilogProcessor';
 function parseSramData(sramPath) {
     const sramConfigs = JSON.parse(fs.readFileSync(sramPath, 'utf8'));
     Object.values(sramConfigs).forEach(sramConfig => {
@@ -8,7 +9,7 @@ function parseSramData(sramPath) {
         const unfoldedOrigination = processOriginationUnfolds(sramConfig);
         sramConfig.originationUnfold = unfoldedOrigination;
     });
-    console.log(sramConfigs);
+    // console.log(sramConfigs)
     return sramConfigs;
 }
 function processOriginationUnfolds(sramConfig) {
@@ -41,7 +42,7 @@ function processOriginationUnfolds(sramConfig) {
             remainingWidth -= origination.width;
         }
     }
-    console.log(unfolds);
+    // console.log(unfolds)
     return unfolds;
 }
 const extractSramList = (config) => {
@@ -83,7 +84,7 @@ function generateSramWrapper(config) {
         case 'ln05lpe_a00_mc_ra1rw_hsr_lvt':
             ports = 'RA1_HS';
             writeEnableMask = 'bit';
-            break;    
+            break;
         default:
             throw new Error(`Unsupported SRAM type: ${config.sram_type}`);
     }
@@ -113,7 +114,7 @@ function ensureFileExists(filePath) {
         fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(filePath, '', 'utf8');
-    console.log(`File created or overwritten: ${filePath}`);
+    // console.log(`File created or overwritten: ${filePath}`)
 }
 function main() {
     const inputPath = process.argv[2];
@@ -123,9 +124,10 @@ function main() {
         for (const sramConfig of Object.values(sramConfigs)) {
             const sramList = extractSramList(sramConfig);
             writeSramList(outputPath, sramList);
-            console.log(`SRAM list has been written to ${outputPath}`);
-            // const originationVerilog = generateOrigination(sramConfig.origination)
-            const wrapperVerilog = generateSramWrapper(sramConfig);
+            // console.log(`SRAM list has been written to ${outputPath}`)
+            let wrapperVerilog = generateSramWrapper(sramConfig);
+            wrapperVerilog = removeParameter(wrapperVerilog);
+            wrapperVerilog = extractModuleImpl(wrapperVerilog, sramConfig.name);
             const wrapperPath = `${sramConfig.output_dir}/${sramConfig.name}_wrapper.v`;
             ensureFileExists(wrapperPath);
             fs.writeFileSync(wrapperPath, wrapperVerilog, 'utf-8');
