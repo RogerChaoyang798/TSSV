@@ -80,7 +80,7 @@ export class SRAM_WRAPPER extends Module {
             }
             case 'RF2_HS': {
                 const io = {
-                    CK: { direction: 'input', isClock: 'posedge' },
+                    RCK: { direction: 'input', isClock: 'posedge' },
                     WCK: { direction: 'input', isClock: 'posedge' },
                     REN: { direction: 'input' },
                     WEN: { direction: 'input' },
@@ -91,7 +91,8 @@ export class SRAM_WRAPPER extends Module {
                     MCSRD: { direction: 'input', width: 2 },
                     MCSWR: { direction: 'input', width: 2 },
                     RET: { direction: 'input', width: 1 },
-                    ADME: { direction: 'input', width: 3 }
+                    ADME: { direction: 'input', width: 3 },
+                    KCS: { direction: 'input', width: 1 }
                 };
                 if (writeEnableMask === 'bit') {
                     io.BWEN = { direction: 'input', width: dataWidth };
@@ -245,8 +246,26 @@ export class SRAM_WRAPPER extends Module {
                 }, this.setupIOs(sram.depth, sram.width, this.params.ports, this.params.writeEnableMask)), { DI: DI_sub, DOUT: DOut_sub }, true, true, true);
             }
             else if (sram.type === 'REG') {
-                this.body +=
-                    `
+                if (this.params.ports === 'RF2_HS') {
+                    this.body += `
+reg  [${sram.width - 1}:0]      DI_REG_0 [${sram.depth - 1n}:0];
+reg  [${sram.width - 1}:0]      DOUT_REG_0;
+always @(posedge WCK) begin
+    if (~WEN) begin
+        DI_REG_0[WA] <= DI[${sram.width - 1}:0];
+    end
+end
+
+always @(posedge RCK) begin
+    if (~REN) begin
+        DOUT_REG_0 <= DI_REG_0[RA];
+    end
+end
+`;
+                }
+                else {
+                    this.body +=
+                        `
 reg  [${sram.width - 1}:0]      DI_REG_0 [${sram.depth - 1n}:0];
 reg  [${sram.width - 1}:0]      DOUT_REG_0;
 always @(posedge CK) begin
@@ -261,6 +280,7 @@ always @(posedge CK) begin
     end
 end
 `;
+                }
                 DOut_list.push('DOUT_REG_0');
             }
         });
