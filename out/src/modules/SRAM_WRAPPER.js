@@ -246,45 +246,29 @@ export class SRAM_WRAPPER extends Module {
                 }, this.setupIOs(sram.depth, sram.width, this.params.ports, this.params.writeEnableMask)), { DI: DI_sub, DOUT: DOut_sub }, true, true, true);
             }
             else if (sram.type === 'REG') {
-                if (this.params.ports === 'RF2_HS') {
-                    this.body += `
-reg  [${sram.width - 1}:0]      DI_REG_0 [${sram.depth - 1n}:0];
-reg  [${sram.width - 1}:0]      DOUT_REG_0;
-always @(posedge WCK) begin
-    if (~WEN) begin
-        DI_REG_0[WA] <= DI[${sram.width - 1}:0];
-    end
-end
-
-always @(posedge RCK) begin
-    if (~REN) begin
-        DOUT_REG_0 <= DI_REG_0[RA];
-    end
-end
-`;
-                }
-                else {
-                    this.body +=
-                        `
-reg  [${sram.width - 1}:0]      DI_REG_0 [${sram.depth - 1n}:0];
-reg  [${sram.width - 1}:0]      DOUT_REG_0;
-always @(posedge CK) begin
-    if (~WEN) begin
-        DI_REG_0[WA] <= DI[${sram.width - 1}:0];
-    end
-end
-
-always @(posedge CK) begin
-    if (~REN) begin
-        DOUT_REG_0 <= DI_REG_0[RA];
-    end
-end
-`;
-                }
+                this.genRegInWrapper('WA' in this.IOs ? 'WA' : 'A', 'RA' in this.IOs ? 'RA' : 'A', 'WCK' in this.IOs ? 'WCK' : 'CK', 'RCK' in this.IOs ? 'RCK' : 'CK', { width: sram.width, depth: sram.depth });
                 DOut_list.push('DOUT_REG_0');
             }
         });
         this.addAssign({ in: new Expr(`{${DOut_list.join(', ')}}`), out: 'DOUT' });
+    }
+    genRegInWrapper(WAorA, RAorA, WCKorCK, RCKorCK, sram) {
+        // 生成Verilog代码
+        this.body += `
+reg  [${sram.width - 1}:0]      DI_REG_0 [${sram.depth - 1n}:0];
+reg  [${sram.width - 1}:0]      DOUT_REG_0;
+always @(posedge ${WCKorCK}) begin
+    if (~WEN) begin
+        DI_REG_0[${WAorA}] <= DI[${sram.width - 1}:0];
+    end
+end
+
+always @(posedge ${RCKorCK}) begin
+    if (~REN) begin
+        DOUT_REG_0 <= DI_REG_0[${RAorA}];
+    end
+end
+    `;
     }
 }
 export default SRAM_WRAPPER;
