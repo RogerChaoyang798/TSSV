@@ -61,28 +61,44 @@ function generateSramWrapper(config) {
     let ports;
     let writeEnableMask;
     switch (config.sram_type) {
+        case 'ln05lpe_a00_mc_rd2r_hsr_rvt':
         case 'ln05lpe_a00_mc_rd2r_hsr_lvt':
             ports = 'RD2_HS';
             writeEnableMask = 'none';
             break;
+        case 'ln05lpe_a00_mc_rd2rw_hsr_rvt':
         case 'ln05lpe_a00_mc_rd2rw_hsr_lvt':
             ports = 'RD2_HS';
             writeEnableMask = 'bit';
             break;
+        case 'ln05lpe_a00_mc_rf2r_hsr_rvt':
         case 'ln05lpe_a00_mc_rf2r_hsr_lvt':
             ports = 'RF2_HS';
             writeEnableMask = 'none';
             break;
+        case 'ln05lpe_a00_mc_rf2rw_hsr_rvt':
         case 'ln05lpe_a00_mc_rf2rw_hsr_lvt':
             ports = 'RF2_HS';
             writeEnableMask = 'bit';
             break;
+        case 'ln05lpe_a00_mc_ra1r_hsr_rvt':
         case 'ln05lpe_a00_mc_ra1r_hsr_lvt':
             ports = 'RA1_HS';
             writeEnableMask = 'none';
             break;
+        case 'ln05lpe_a00_mc_ra1rw_hsr_rvt':
         case 'ln05lpe_a00_mc_ra1rw_hsr_lvt':
             ports = 'RA1_HS';
+            writeEnableMask = 'bit';
+            break;
+        case 'ln05lpe_a00_mc_rf1r_hsr_lvt':
+        case 'ln05lpe_a00_mc_rf1r_hsr_rvt':
+            ports = 'RF1_HS';
+            writeEnableMask = 'none';
+            break;
+        case 'ln05lpe_a00_mc_rf1rw_hsr_lvt':
+        case 'ln05lpe_a00_mc_rf1rw_hsr_rvt':
+            ports = 'RF1_HS';
             writeEnableMask = 'bit';
             break;
         default:
