@@ -1,6 +1,23 @@
 import { type IntRange } from 'tssv/lib/core/TSSV'
+import { execSync } from 'child_process'
 
-// ... existing code
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+// shared project version control functions
+const __dirname = dirname(fileURLToPath(import.meta.url))
+export const getCommitId = () => {
+  try {
+    const tssvDir = __dirname
+    return execSync('git rev-parse HEAD', { cwd: tssvDir }).toString().trim()
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error('Failed to get Git commit ID:', err.message)
+      return 'unknown_commit'
+    } else {
+      console.error('Unknown error:', err)
+    }
+  }
+}
 
 // AIGCStr definition
 export const AIGCStr = `
@@ -51,6 +68,7 @@ export type RegisterType = 'RO' | 'RW' | 'WO' | 'RAM' | 'ROM' | 'W1C' | 'W1T' | 
 
 // }
 
+/* JSON.stringify does not support bigint, so we need to convert it to string */
 interface BaseRegister {
   startAddr: string
   type: RegisterType
@@ -59,6 +77,7 @@ interface BaseRegister {
   reserved?: Array<[number, number]>
   weOut?: boolean
   useBuf?: boolean
+  fieldOut?: boolean
 }
 
 export interface Register extends BaseRegister {
@@ -67,10 +86,13 @@ export interface Register extends BaseRegister {
   hardUpdate?: number
 }
 
-export interface RegisterData {
-  type: string
+export interface RegisterConstructor {
+  type: RegisterType
   reset: bigint
-  description: string | undefined
+  description?: string
+  weOut?: boolean
+  useBuf?: boolean
+  fieldOut?: boolean
 }
 
 export interface RegWoFdsUnfoldRep extends BaseRegister {
@@ -109,6 +131,9 @@ export interface SramConfig {
 export function parseBitRange (bitRange: string): [number, number] {
   if (bitRange.includes(':')) {
     const parts = bitRange.split(':').map(part => parseInt(part.trim(), 10))
+    if (parts[0] < parts[1]) {
+      parts.reverse() // Ensure the first part is always greater than the second
+    }
     return [parts[0], parts[1]]
   } else {
     const singleValue = parseInt(bitRange.trim(), 10)

@@ -1,5 +1,20 @@
+import { fileURLToPath } from 'url'
 import * as fs from 'fs'
 import { type RegWoFdsUnfoldRep, type Field, type Register, padZeroes } from 'tssv/lib/tools/shared'
+import { dirname } from 'path'
+import * as path from 'path'
+import { execSync } from 'child_process'
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const getCommitId = () => {
+  try {
+    const tssvDir = __dirname
+    return execSync('git rev-parse HEAD', { cwd: tssvDir }).toString().trim()
+  } catch (err) {
+    console.error('Failed to get Git commit ID:', (err as Error).message)
+    return 'unknown_commit'
+  }
+}
+const commitId = getCommitId()
 const registersFilePath = process.argv[2]
 const outputSvFilePath = process.argv[3]
 const outputJsonFilePath = process.argv[4]
@@ -12,9 +27,13 @@ if (!registersFilePath || !outputSvFilePath || !outputJsonFilePath) {
 const BITS_OF_BYTE = 8
 const regs = JSON.parse(fs.readFileSync(registersFilePath, 'utf8')) as Record<string, Register>
 const svFile = fs.createWriteStream(outputSvFilePath)
-svFile.write('package AIGC_DEMO_reg_pkg;\n\n')
+const pkgName = path.basename(outputSvFilePath, path.extname(outputSvFilePath))
+svFile.write(`package ${pkgName};
+
+`)
 svFile.write('// =============================================================================\n')
 svFile.write('// Register bit field definition\n')
+svFile.write(`// Commit ID: ${commitId}\n`)
 svFile.write('// =============================================================================\n\n')
 
 const regs_wofields = {} as Record<string, Register> as Record<string, RegWoFdsUnfoldRep>
@@ -95,7 +114,7 @@ const structsCode = generateAllStructs(regs)
 svFile.write(structsCode, 'utf8', () => {
   console.log(`Packed Written successfully to ${outputSvFilePath}`)
 })
-svFile.write('endpackage : AIGC_DEMO_reg_pkg\n')
+svFile.write(`endpackage : ${pkgName}\n`)
 svFile.end()
 
 fs.writeFileSync(outputJsonFilePath, JSON.stringify(regs_wofields, null, 2))

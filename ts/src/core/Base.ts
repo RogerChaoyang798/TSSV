@@ -1469,7 +1469,9 @@ end
      * write the generated SystemVerilog code to a string
      * @returns string containing the generated SystemVerilog code for this module
      */
-  writeSystemVerilog (): string {
+  writeSystemVerilog (includeVerilatorDirectives: boolean = false): string {
+    const verilatorOff = includeVerilatorDirectives ? '/* verilator lint_off WIDTH */' : ''
+    const verilatorOn = includeVerilatorDirectives ? '/* verilator lint_on WIDTH */' : ''
     const paramsString = this.assembleParameters()
     const { IOString, interfacesString, signalArray } = this.assembleIODefinition()
     const signalString = this.assembleSignals(signalArray)
@@ -1481,7 +1483,7 @@ end
     ${interfacesString}        
     ${definitions}
             
-    /* verilator lint_off WIDTH */        
+    ${verilatorOff}        
     module ${this.name} ${paramsString}
        (
     ${IOString}
@@ -1496,15 +1498,16 @@ end
     ${regBlksReorderString}
     
     endmodule
-    /* verilator lint_on WIDTH */        
+    ${verilatorOn}       
     `
     return verilog
   }
 
-  writeVerilog (): string {
-    // assemble TSSVParameters
+  writeVerilog (includeVerilatorDirectives: boolean = false): string {
+    const verilatorOff = includeVerilatorDirectives ? '/* verilator lint_off WIDTH */' : ''
+    const verilatorOn = includeVerilatorDirectives ? '/* verilator lint_on WIDTH */' : ''
     const paramsString = this.assembleParameters()
-    // construct IO definition
+    
     const { IOString, interfacesString, signalArray } = this.assembleIODefinition(false)
     const signalString = this.assembleSignals(signalArray, false)
     // const registerBlocksString = this.assembleRegisterBlocks(false)
@@ -1515,7 +1518,7 @@ end
     ${interfacesString}        
     ${definitions}
             
-    /* verilator lint_off WIDTH */        
+    ${verilatorOff}         
     module ${this.name} ${paramsString}
        (
     ${IOString}
@@ -1530,7 +1533,7 @@ end
     ${regBlksReorderString}
     
     endmodule
-    /* verilator lint_on WIDTH */  
+    ${verilatorOn}  
     `
     return verilog
   }

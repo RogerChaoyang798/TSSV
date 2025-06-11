@@ -54,6 +54,9 @@ export class SRAM_WRAPPER extends Module {
     }
   }
 
+  /*
+  setupIOs creates the input/output signals for the SRAM_WRAPPER module based on the specified parameters.
+  */
   private setupIOs (depth: bigint, dataWidth: number, ports: PortsType, writeEnableMask: 'none' | 'bit' | undefined): IOSignals {
     switch (ports) {
       case 'VROM_HD': {
@@ -136,6 +139,74 @@ export class SRAM_WRAPPER extends Module {
     }
   }
 
+/*  The setupIOs function is responsible for creating the input/output signals for the SRAM_WRAPPER module.
+private setupIOs(depth: bigint, dataWidth: number, ports: PortsType, writeEnableMask: 'none' | 'bit' | undefined): IOSignals {
+  const commonSignals = (additionalSignals: Record<string, any> = {}): IOSignals => ({
+    ...additionalSignals,
+    DOUT: { direction: 'output', width: dataWidth },
+    ...(writeEnableMask === 'bit' ? { BWEN: { direction: 'input', width: dataWidth } } : {})
+  });
+
+  switch (ports) {
+    case 'VROM_HD':
+      return commonSignals({
+        CK: { direction: 'input', isClock: 'posedge' },
+        CSN: { direction: 'input' },
+        A: { direction: 'input', width: this.bitWidth(depth - 1n) },
+        MCS: { direction: 'input', width: 1 },
+        KCS: { direction: 'input', width: 1 },
+        PDE: { direction: 'input', width: 1 },
+        PRN: { direction: 'output', width: 1 }
+      });
+
+    case 'RF1_HD':
+    case 'RF1_HS':
+    case 'RA1_HD':
+    case 'RA1_HS':
+      return commonSignals({
+        CK: { direction: 'input', isClock: 'posedge' },
+        CSN: { direction: 'input' },
+        WEN: { direction: 'input' },
+        DI: { direction: 'input', width: dataWidth },
+        A: { direction: 'input', width: this.bitWidth(depth - 1n) },
+        MCS: { direction: 'input', width: 2 },
+        MCSW: { direction: 'input', width: 1 },
+        RET: { direction: 'input', width: 1 },
+        ADME: { direction: 'input', width: 3 }
+      });
+
+    case 'RD2_HS':
+      return commonSignals({
+        CK: { direction: 'input', isClock: 'posedge' },
+        REN: { direction: 'input' },
+        WEN: { direction: 'input' },
+        DI: { direction: 'input', width: dataWidth },
+        RA: { direction: 'input', width: this.bitWidth(depth - 1n) },
+        WA: { direction: 'input', width: this.bitWidth(depth - 1n) },
+        MCSRD: { direction: 'input', width: 2 },
+        MCSWR: { direction: 'input', width: 2 },
+        RET: { direction: 'input', width: 1 },
+        ADME: { direction: 'input', width: 3 }
+      });
+
+    case 'RF2_HS':
+      return commonSignals({
+        RCK: { direction: 'input', isClock: 'posedge' },
+        WCK: { direction: 'input', isClock: 'posedge' },
+        REN: { direction: 'input' },
+        WEN: { direction: 'input' },
+        DI: { direction: 'input', width: dataWidth },
+        RA: { direction: 'input', width: this.bitWidth(depth - 1n) },
+        WA: { direction: 'input', width: this.bitWidth(depth - 1n) },
+        MCSRD: { direction: 'input', width: 2 },
+        MCSWR: { direction: 'input', width: 2 },
+        RET: { direction: 'input', width: 1 },
+        ADME: { direction: 'input', width: 3 },
+        KCS: { direction: 'input', width: 1 }
+      });
+  }
+}
+*/
   /*
   private splitDepth (): void {
     const DOut_Tmp_list: string[] = []
