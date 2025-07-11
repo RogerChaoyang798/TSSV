@@ -1,8 +1,8 @@
 import * as fs from 'fs'
 import path from 'path'
-import { SRAM_WRAPPER } from 'tssv/lib/modules/SRAM_WRAPPER'
+import { SRAM_WRAPPER, type PortsType } from 'tssv/lib/modules/SRAM_WRAPPER'
 import { extractModuleImpl, removeParameter } from 'tssv/lib/tools/verilogProcessor'
-import { type Origination, type OriginationUnfold, type SramConfig } from 'tssv/lib/tools/shared'
+import { type OriginationUnfold, type SramConfig } from 'tssv/lib/tools/shared'
 
 function parseSramData (sramPath: string): Record<string, SramConfig> {
   const sramConfigs = JSON.parse(fs.readFileSync(sramPath, 'utf8')) as Record<string, SramConfig>
@@ -66,7 +66,7 @@ const writeSramList = (filePath: string, data: string): void => {
 }
 
 function generateSramWrapper (config: SramConfig): string {
-  let ports: 'RD2_HS' | 'RF2_HS' | 'RA1_HD' | 'RA1_HS' | 'RF1_HS' | 'RF1_HD' | 'VROM_HD'
+  let ports: PortsType
   let writeEnableMask: 'none' | 'bit'
 
   switch (config.sram_type) {
@@ -118,24 +118,26 @@ function generateSramWrapper (config: SramConfig): string {
       throw new Error(`Unsupported SRAM type: ${config.sram_type}`)
   }
 
+  //  config.originationUnfold.map(origination => ({
+  //     instName: origination.instName,
+  //     module: origination.module,
+  //     width: origination.width,
+  //     depth: origination.depth,
+  //     bitBig: origination.bitBig,
+  //     type: origination.type,
+  //     adr_mask: origination.adr_mask,
+  //     en_ptn: origination.en_ptn
+  //   })
+  // })
+
   const wrapper = new SRAM_WRAPPER({
     name: `${config.name}`,
     dataWidth: config.width,
     depth: BigInt(config.depth),
     ports,
     writeEnableMask,
-    split_direction: config.split_direction,
-    subSrams: config.originationUnfold.map(origination => ({
-      instName: origination.instName,
-      module: origination.module,
-      width: origination.width,
-      depth: origination.depth,
-      bitBig: origination.bitBig,
-      type: origination.type,
-      adr_mask: origination.adr_mask,
-      en_ptn: origination.en_ptn
-    }))
-  })
+    split_direction: config.split_direction
+  }, config.originationUnfold)
 
   return wrapper.writeVerilog()
 }
@@ -151,13 +153,26 @@ function ensureFileExists (filePath: string): void {
   // console.log(`File created or overwritten: ${filePath}`)
 }
 
-function main () {
+function checkConfig (wrapConfig: SramConfig): void {
+  if (wrapConfig.split_direction === 'depth') {
+    for (const macro of wrapConfig.origination) {
+      if (macro.type === 'SRAM' && (!macro.adr_mask || !macro.en_ptn)) {
+        throw new Error(
+        `When split_direction is 'depth' and type is 'SRAM', both adr_mask and en_ptn must be provided. Problematic entry: ${JSON.stringify(macro)}`
+        )
+      }
+    }
+  }
+}
+
+function main (): void {
   const inputPath = process.argv[2]
   const outputPath = process.argv[3]
 
   try {
     const sramConfigs = parseSramData(inputPath)
     for (const sramConfig of Object.values(sramConfigs)) {
+      checkConfig(sramConfig)
       const sramList = extractSramList(sramConfig)
       writeSramList(outputPath, sramList)
       // console.log(`SRAM list has been written to ${outputPath}`)

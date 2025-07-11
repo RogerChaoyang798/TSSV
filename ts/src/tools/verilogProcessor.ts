@@ -83,7 +83,7 @@ export function splitWdataByRes (content: string, wordSize: number, regs: Record
 +DEBUG_0_t reg_debug_0;
 */
 
-export function replaceSignalTypes (content: string, wordSize: number, regs: Record<string, any>): string {
+export function replaceSignalTypes (content: string, wordSize: number, regs: Record<string, RegWoFdsUnfoldRep>): string {
   return content
     .split('\n')
     .map(line => {
@@ -92,7 +92,9 @@ export function replaceSignalTypes (content: string, wordSize: number, regs: Rec
         for (const [key, reg] of Object.entries(regs)) {
           const keyPattern = `reg_${key.toLowerCase()};`
           if (trimmedLine.includes(keyPattern)) {
-            return trimmedLine.replace(`logic [${wordSize - 1}:0]`, reg.packName)
+            if (reg.packName) {
+              return trimmedLine.replace(`logic [${wordSize - 1}:0]`, reg.packName)
+            }
           }
         }
       }

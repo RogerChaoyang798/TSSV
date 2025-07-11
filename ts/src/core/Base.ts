@@ -225,7 +225,7 @@ export class Module {
   protected interfaces: Interfaces
 
   /**
-     * base constructor
+     * base constructor: obtain name by connecting parameters by '_'
      * @param params parameter value bundle
      * @param IOs IO port bundle
      * @param signals signal bundle
@@ -258,6 +258,10 @@ export class Module {
     this.verilogParams = {}
   }
 
+  /**
+     * setVerilogParameter: add a parameter to verilogParams which record whether a parameter should be included in the generated verilog
+     * @param param parameter name to add to verilogParams
+  */
   setVerilogParameter (param: string): void {
     if (!this.params[param]) {
       throw Error(`${param} does not exist!`)
@@ -1186,18 +1190,19 @@ ${caseAssignments}
    * @param size The number of instances to generate.
    * @returns The generated SystemVerilog code as a string.
    */
-  generateBufferInstances(bufferName: string, bufferOut: string, instanceName: string, size: number): string {
-    let svCode = '';
+  generateBufferInstances (bufferName: string, bufferOut: string, instanceName: string, size: number): string {
+    let svCode = ''
     if (size === 1) {
-      svCode += `    ${instanceName} u_${bufferName} (.in(buf_in_${bufferName}[0]), .out(${bufferName}[0]));\n`;
+      svCode += `    ${instanceName} u_${bufferName} (.in(buf_in_${bufferName}[0]), .out(${bufferName}[0]));\n`
     } else {
-      svCode += `generate\n`;
-      svCode += `    for(i=0; i<${size}; i=i+1) begin: GEN_${bufferName}\n`;
-      svCode += `        ${instanceName} u_${bufferName} (.in(${bufferName}[i]), .out(${bufferOut}[i]));\n`;
-      svCode += `    end\n`;
-      svCode += `endgenerate\n`;
+      svCode += 'genvar i;\n'
+      svCode += 'generate\n'
+      svCode += `    for(i=0; i<${size}; i=i+1) begin: GEN_${bufferName}\n`
+      svCode += `        ${instanceName} u_${bufferName} (.in(${bufferName}[i]), .out(${bufferOut}[i]));\n`
+      svCode += '    end\n'
+      svCode += 'endgenerate\n'
     }
-    return svCode;
+    return svCode
   }
 
   /**
@@ -1507,7 +1512,7 @@ end
     const verilatorOff = includeVerilatorDirectives ? '/* verilator lint_off WIDTH */' : ''
     const verilatorOn = includeVerilatorDirectives ? '/* verilator lint_on WIDTH */' : ''
     const paramsString = this.assembleParameters()
-    
+
     const { IOString, interfacesString, signalArray } = this.assembleIODefinition(false)
     const signalString = this.assembleSignals(signalArray, false)
     // const registerBlocksString = this.assembleRegisterBlocks(false)

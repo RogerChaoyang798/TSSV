@@ -1,11 +1,13 @@
 import { Module, type OperationIO, type TSSVParameters, type IntRange, Expr, type Interface, Sig } from 'tssv/lib/core/TSSV'
 import { Memory } from 'tssv/lib/interfaces/Memory'
 import { APB4 } from 'tssv/lib/interfaces/AMBA/AMBA4/APB4/r0p0_0/APB4'
-import { type Field, type RegisterType, generateAPBStr, calculateDecMask, calculatePassMask, replaceZerosWithX, AIGC2APB4, AIGCStr, padZeroes } from '../tools/shared.js'
-// import { type RegWoFdsUnfoldRep } from '../tools/shared.js'
+import { Casex, type Field, type RegisterType, generateAPBStr, calculateDecMask, replaceZerosWithX, AIGC2APB4, AIGCStr, padZeroes } from 'tssv/lib/tools/shared'
 import { isObjectBindingPattern } from 'typescript'
 import { isBooleanObject } from 'util/types'
 
+function isIntRange16to64 (x: number | undefined): x is IntRange<16, 64> {
+  return typeof x === 'number' && Number.isInteger(x) && x >= 16 && x <= 64
+}
 interface Register {
   type: RegisterType
   reset?: bigint
@@ -34,6 +36,7 @@ export class RegAddr {
     return nextAddr
   }
 }
+
 export interface RegisterBlockDef<T extends Record<string, bigint>> {
   wordSize: 32 | 64
   addrMap: T
@@ -45,7 +48,7 @@ export interface RegisterBlockParameters extends TSSVParameters {
   busInterface?: 'Memory' | 'TL_UL'
   endianess?: 'little'
   busIDWidth?: 8
-  busAddressWidth?: 32
+  busAddressWidth?: 32 | 12 | 16
 }
 
 export class RegisterBlock<T extends Record<string, bigint>> extends Module {
@@ -261,9 +264,14 @@ export class RegisterBlock<T extends Record<string, bigint>> extends Module {
   }
 
   private genRegBlkMemory (regDefs: RegisterBlockDef<T>, params: RegisterBlockParameters): void {
+    const addrWidth = params.busAddressWidth
+
+    if (!isIntRange16to64(addrWidth)) {
+      throw new Error(`Invalid ADDR_WIDTH: ${addrWidth}, must be integer in [16, 64]`)
+    }
     this.addInterface('regs', new Memory({
       DATA_WIDTH: regDefs.wordSize || 32,
-      ADDR_WIDTH: params.busAddressWidth
+      ADDR_WIDTH: addrWidth
     }, 'inward'))
     for (const reg in regDefs.addrMap) {
       const [baseAddr, regName, matchSig, , thisReg] = this.setupMatchPack(params, reg, false)
@@ -273,7 +281,7 @@ export class RegisterBlock<T extends Record<string, bigint>> extends Module {
         this.addAssign({ in: new Expr(`regs.ADDR == ${baseAddr}`), out: matchSig })
         const RE_Sig = this.addSignal(`${regName}_RE`, { width: 1 })
         this.addAssign({ in: new Expr(`${matchSig.toString()} && regs.RE`), out: RE_Sig })
-        this.IOs[regName.toString()] = {  direction: 'output',  width: thisReg.width || regDefs.wordSize,  isSigned: thisReg.isSigned}
+        this.IOs[regName.toString()] = { direction: 'output', width: thisReg.width || regDefs.wordSize, isSigned: thisReg.isSigned }
       } else if (thisReg.type === 'WO') {
         const wstrbWidth = (params.busAddressWidth || 8) / 8
         const wstrb = this.addSignal(`${regName}_wstrb`, { width: wstrbWidth })
@@ -283,7 +291,7 @@ export class RegisterBlock<T extends Record<string, bigint>> extends Module {
 
         const WE_Sig = this.addSignal(`${regName}_WE`, { width: 1 })
         this.addAssign({ in: new Expr(`${matchSig.toString()} && regs.WE`), out: WE_Sig })
-        this.IOs[regName] = {  direction: 'output',  width: thisReg.width || regDefs.wordSize,  isSigned: thisReg.isSigned}
+        this.IOs[regName] = { direction: 'output', width: thisReg.width || regDefs.wordSize, isSigned: thisReg.isSigned }
         this.addAssign({ in: new Expr('regs.DATA_WR'), out: regName.toString() })
       } else if (thisReg.type === 'ROM') {
         if (thisReg.size) {
@@ -295,9 +303,9 @@ export class RegisterBlock<T extends Record<string, bigint>> extends Module {
         const ROM_ADDR = this.addSignal(`${regName}_ADDR`, { width: params.busAddressWidth })
         this.addAssign({ in: new Expr(`${matchSig.toString()} && regs.RE`), out: RE_Sig })
         this.addAssign({ in: new Expr('regs.ADDR'), out: ROM_ADDR })
-        this.IOs[`${regName}_rdata`] = {  direction: 'output',  width: thisReg.width || regDefs.wordSize,  isSigned: thisReg.isSigned}
-        this.IOs[`${regName}_re`] = {  direction: 'output',  width: 1}
-        this.IOs[`${regName}_ready`] = {  direction: 'output',  width: 1}
+        this.IOs[`${regName}_rdata`] = { direction: 'output', width: thisReg.width || regDefs.wordSize, isSigned: thisReg.isSigned }
+        this.IOs[`${regName}_re`] = { direction: 'output', width: 1 }
+        this.IOs[`${regName}_ready`] = { direction: 'output', width: 1 }
         this.addRegister({ d: 'regs.READY', clk: 'clk', reset: 'rst_b', en: 'regs.WE', q: `${regName}_ready` })
       } else if (thisReg.type === 'RAM') {
         if (thisReg.size) {
@@ -333,9 +341,14 @@ export class RegisterBlock<T extends Record<string, bigint>> extends Module {
   }
 
   private genRegBlkAPB4 (regDefs: RegisterBlockDef<T>, params: RegisterBlockParameters): void {
+    const addrWidth = params.busAddressWidth
+
+    if (!isIntRange16to64(addrWidth)) {
+      throw new Error(`Invalid ADDR_WIDTH: ${addrWidth}, must be integer in [16, 64]`)
+    }
     this.addInterface('regs', new APB4({
       DATA_WIDTH: regDefs.wordSize || 32,
-      ADDR_WIDTH: params.busAddressWidth
+      ADDR_WIDTH: addrWidth
     }, 'inward'))
     const { signals, expressions } = this.setupSignalsExprs(regDefs, params, true, AIGC2APB4)
     const { reg_rd, reg_wr, reg_addr, reg_rdata, reg_wdata, next_rdata, inRange } = signals
@@ -361,8 +374,6 @@ export class RegisterBlock<T extends Record<string, bigint>> extends Module {
   }
 
   private addCasexStr (): string {
-    let readyStr = ''
-    const inputs: string[] = []
     let casexString = `
   always @(regs.ADDR or regs.RE)
     if(regs.RE == 1) begin
@@ -372,67 +383,32 @@ export class RegisterBlock<T extends Record<string, bigint>> extends Module {
     for (const reg in this.regDefs.addrMap) {
       const regName = reg
       const baseAddr = this.regDefs.addrMap[regName]
-
+      let readyStr = '1\'b1'
       let readSignal = ''
+      let condStr = `     8'b${padZeroes(baseAddr.toString(2), 8)}`
       const register = this.regDefs.registers?.[regName]
       if (register?.type === 'ROM') {
         readSignal = `${regName}_rdata`
-        inputs.push(`${regName}_rdata`)
         readyStr = `${regName}_ready`
-        casexString +=
-  `     8'b${padZeroes(replaceZerosWithX(baseAddr.toString(2)), 8)}: begin
-            regs.DATA_RD <= ${readSignal};
-            regs.READY <= ${readyStr};
-        end\n`
+        condStr = `     8'b${padZeroes(replaceZerosWithX(baseAddr.toString(2)), 8)}`
       } else if (register?.type === 'RAM') {
         readSignal = `${regName}_wdata`
-        inputs.push(`${regName}_rdata`)
         readyStr = `${regName}_ready`
-        casexString +=
-  `     8'b${padZeroes(replaceZerosWithX(baseAddr.toString(2)), 8)}: begin
-            regs.DATA_RD <= ${readSignal};
-            regs.READY <= ${readyStr};
-        end\n`
+        condStr = `     8'b${padZeroes(replaceZerosWithX(baseAddr.toString(2)), 8)}`
       } else if (register?.type === 'RO') {
         readSignal = regName
-        inputs.push(`${regName}`)
-        readyStr = '1\'b1'
-        casexString +=
-  `     8'b${padZeroes(baseAddr.toString(2), 8)}: begin
-            regs.DATA_RD <= ${readSignal};
-            regs.READY <= ${readyStr};
-        end\n`
       } else if (register?.type === 'RW') {
         if (register.fields && Object.keys(register.fields).length > 0) {
           readSignal = Object.keys(register.fields).map((fieldName, index) => `${regName}_field${index}`).reverse().join(', ')
           readSignal = `{${readSignal}}`
-          inputs.push(`${regName}_field0`)
-          inputs.push(`${regName}_field1`)
-          readyStr = '1\'b1'
-          casexString +=
-  `     8'b${padZeroes(baseAddr.toString(2), 8)}: begin
-            regs.DATA_RD <= ${readSignal};
-            regs.READY <= ${readyStr};
-        end\n`
         } else {
           readSignal = regName
-          inputs.push(`${regName}`)
-          readyStr = '1\'b1'
-          casexString +=
-  `     8'b${padZeroes(baseAddr.toString(2), 8)}: begin
-            regs.DATA_RD <= ${readSignal};
-            regs.READY <= ${readyStr};
-        end\n`
         }
       } else {
         readSignal = regName
-        inputs.push(`${regName}`)
-        casexString +=
-  `     8'b${padZeroes(baseAddr.toString(2), 8)}: begin
-            regs.DATA_RD <= ${readSignal};
-            regs.READY <= ${readyStr};
-        end\n`
       }
+      const regCasex = new Casex(condStr, readSignal, readyStr)
+      casexString += regCasex.toString()
     }
     casexString += '      default: regs.DATA_RD <= 0;\n'
     casexString += '    endcase\n'

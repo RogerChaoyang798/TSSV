@@ -1,5 +1,6 @@
 import { Module, type TSSVParameters, type Sig, Expr, type IOSignals, extractNumberFromPattern } from 'tssv/lib/core/TSSV'
-type PortsType = 'RD2_HS' | 'RF2_HS' | 'RA1_HD' | 'RA1_HS' | 'RF1_HS' | 'RF1_HD' | 'VROM_HD'
+import { type OriginationUnfold } from 'tssv/lib/tools/shared'
+export type PortsType = 'RD2_HS' | 'RF2_HS' | 'RA1_HD' | 'RA1_HS' | 'RF1_HS' | 'RF1_HD' | 'VROM_HD'
 
 export interface SRAM_WRAPPER_Parameters extends TSSVParameters {
   dataWidth: number
@@ -8,32 +9,23 @@ export interface SRAM_WRAPPER_Parameters extends TSSVParameters {
   split_direction: 'depth' | 'width'
   writeEnableMask?: 'none' | 'bit'
   macroConfig?: string
-  subSrams?: Array<{
-    instName: string
-    module: string
-    width: number
-    depth: bigint
-    bitBig: number
-    type: string
-    adr_mask: string
-    en_ptn: string
-  }>
+  // subSrams?: Array<{
+  //   instName: string
+  //   module: string
+  //   width: number
+  //   depth: bigint
+  //   bitBig: number
+  //   type: string
+  //   adr_mask: string
+  //   en_ptn: string
+  // }>
 }
 
 export class SRAM_WRAPPER extends Module {
   declare params: SRAM_WRAPPER_Parameters
-  private readonly subSrams: Array<{
-    instName: string
-    module: string
-    width: number
-    depth: bigint
-    bitBig: number
-    type: string
-    adr_mask: string
-    en_ptn: string
-  }>
+  private readonly subSrams: OriginationUnfold[]
 
-  constructor (params: SRAM_WRAPPER_Parameters) {
+  constructor (params: SRAM_WRAPPER_Parameters, compSrams: OriginationUnfold[] = []) {
     super({
       name: params.name,
       dataWidth: params.dataWidth,
@@ -45,9 +37,16 @@ export class SRAM_WRAPPER extends Module {
       subSrams: params.subSrams || []
     })
     this.IOs = this.setupIOs(this.params.depth, this.params.dataWidth, this.params.ports, this.params.writeEnableMask)
-    this.subSrams = this.params.subSrams || []
+    this.subSrams = compSrams
 
     if (this.params.split_direction === 'depth') {
+      this.subSrams.forEach(sram => {
+        if (sram.type === 'SRAM' && (sram.en_ptn == null || sram.adr_mask == null)) {
+          throw new Error(
+        `SRAM submodule "${sram.instName}" is missing en_ptn or adr_mask`
+          )
+        }
+      })
       this.splitDepth()
     } else if (this.params.split_direction === 'width') {
       this.splitWidth()
@@ -139,7 +138,7 @@ export class SRAM_WRAPPER extends Module {
     }
   }
 
-/*  The setupIOs function is responsible for creating the input/output signals for the SRAM_WRAPPER module.
+  /*  The setupIOs function is responsible for creating the input/output signals for the SRAM_WRAPPER module.
 private setupIOs(depth: bigint, dataWidth: number, ports: PortsType, writeEnableMask: 'none' | 'bit' | undefined): IOSignals {
   const commonSignals = (additionalSignals: Record<string, any> = {}): IOSignals => ({
     ...additionalSignals,
@@ -271,7 +270,8 @@ private setupIOs(depth: bigint, dataWidth: number, ports: PortsType, writeEnable
           REN_D0_sub = this.addSignal(`REN_${sram.instName.toUpperCase()}_D0`, { width: 1, type: 'reg' })
           RA_sub = this.addSignal(`RA_${sram.instName.toUpperCase()}`, { width: this.bitWidth(sram.depth - 1n), type: 'wire' })
         }
-        const decWidth: number | null = extractNumberFromPattern(sram.en_ptn)
+
+        const decWidth: number | null = extractNumberFromPattern(sram.en_ptn!)
         const raWidth: number = this.bitWidth(this.params.depth - 1n)
 
         if (decWidth != null) {
@@ -303,7 +303,10 @@ private setupIOs(depth: bigint, dataWidth: number, ports: PortsType, writeEnable
         if (REN_sub && REN_D0_sub && RA_sub != null) {
           this.addAssign({ in: new Expr(`RA & ${sram.adr_mask}`), out: RA_sub })
           this.addAssign({ in: new Expr(`${DOut_sub.toString()} & {${sram.width}{${REN_D0_sub.toString()}}}`), out: DOut_tmp })
-          this.addRegister({ d: new Expr(`~${REN_sub.toString()}`), clk: 'CK', q: REN_D0_sub })
+          this.addRegister({ d: new Expr(`~${REN_sub.toString()}`), clk: 'CK' in this.IOs ? 'CK' : 'RCK', q: REN_D0_sub })
+          // if ('WCK' in this.IOs) {
+          //   this.addRegister({ d: new Expr(`~${WEN_sub.toString()}`), clk: 'WCK', q: WEN_D0_sub })
+          // }
         } else {
           this.addAssign({ in: new Expr(DOut_sub.toString()), out: DOut_tmp })
         }
@@ -319,7 +322,6 @@ private setupIOs(depth: bigint, dataWidth: number, ports: PortsType, writeEnable
               }
             : {})
         }
-        // 根据 `WA` 是否存在于 `this.IOs` 来设置 `WA` 或 `A`
         if (WA_sub) {
           submoduleInputs.WA = WA_sub
         } else if (A_sub) {
@@ -397,3 +399,11 @@ end
 }
 
 export default SRAM_WRAPPER
+
+// .A    (A   ),
+// .CEN  (CEN ),
+// .CLK  (CLK ),
+// .D    (D   ),
+// .GWEN (GWEN),
+// .Q    (Q   ),
+// .WEN  (WEN )

@@ -31,7 +31,7 @@ function createRegConstruts (regs: Record<string, RegWoFdsUnfoldRep>): Record<st
   }, {})
 }
 
-function generateSVerilog (regBlock: RegisterBlock<any>, outSvFilePath: string, regs: Record<string, any>, regsFieldOut: Record<string, Register>): void {
+function generateSVerilog (regBlock: RegisterBlock<any>, outSvFilePath: string, regs: Record<string, RegWoFdsUnfoldRep>, regsFieldOut: Record<string, Register>): void {
   const rawVerilog = regBlock.writeSystemVerilog()
   let adjustedVerilog = replaceSignalTypes(rawVerilog, WORD_SIZE, regs)
   adjustedVerilog = splitWdataByRes(adjustedVerilog, WORD_SIZE, regs)
@@ -44,7 +44,7 @@ ${adjustedVerilog} : ${regBlock.name}
   fs.writeFileSync(outSvFilePath, adjustedVerilog)
 }
 
-function generateVerilog (regBlock: RegisterBlock<any>, outVFilePath: string, regs: Record<string, any>): void {
+function generateVerilog (regBlock: RegisterBlock<any>, outVFilePath: string, regs: Record<string, RegWoFdsUnfoldRep>): void {
   let rawVerilog = regBlock.writeVerilog()
   rawVerilog = trimLines(rawVerilog)
   let adjustedVerilog = splitWdataByRes(rawVerilog, WORD_SIZE, regs)
@@ -58,8 +58,8 @@ function generateVerilog (regBlock: RegisterBlock<any>, outVFilePath: string, re
 function main (): void {
   const regsPath = process.argv[2]
   const outputSvFilePath = process.argv[3]
+  const busAddrW = parseInt(process.argv[4] ?? '32', 10) // Default to 32 if not provided
   const name = outputSvFilePath.split('/').pop()?.replace(/\.sv$/, '') || ''
-  const busAddrW = process.argv[4]
   const outVFilePath = outputSvFilePath.replace('.sv', '.v')
 
   const regs = parseRegWoFdsUnfoldRep(regsPath)
@@ -68,7 +68,7 @@ function main (): void {
   const myRegMap = createRegisterMap(regs)
   const regConstruts = createRegConstruts(regs)
   const myRegs = {
-    wordSize: WORD_SIZE as unknown as 32,
+    wordSize: WORD_SIZE as 32 | 64,
     addrMap: myRegMap,
     registers: regConstruts
   }
@@ -79,11 +79,14 @@ export interface RegisterBlockDef<T extends Record<string, bigint>> {
   baseAddress?: bigint
   registers: { [name in keyof T]?: Register }
 }
-  */
+*/
+  if (busAddrW !== 32 && busAddrW !== 12 && busAddrW !== 16) {
+    throw new Error('busAddrW must be 32 or 12 or 16 bits')
+  }
   const regBlock = new RegisterBlock<typeof myRegs.addrMap>(
     {
       name: name || '',
-      busAddressWidth: busAddrW as unknown as 32
+      busAddressWidth: busAddrW as 12 | 16 | 32
     },
     myRegs,
     {}
@@ -91,7 +94,7 @@ export interface RegisterBlockDef<T extends Record<string, bigint>> {
   const regBlockV = new RegisterBlock<typeof myRegs.addrMap>(
     {
       name: name || '',
-      busAddressWidth: busAddrW as unknown as 32
+      busAddressWidth: busAddrW as 32
     },
     myRegs,
     {}

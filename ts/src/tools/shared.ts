@@ -3,6 +3,9 @@ import { execSync } from 'child_process'
 
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
+
+export const HEX2BIN = 4
+
 // shared project version control functions
 const __dirname = dirname(fileURLToPath(import.meta.url))
 export const getCommitId = () => {
@@ -44,6 +47,24 @@ export const AIGC2APB4 = {
   pslverr: 'regs.PSLVERR'
 }
 
+export class Casex {
+  private readonly casexStr: string
+  constructor (casexStrOrCond: string, readSignal?: string, readyStr?: string) {
+    if (readSignal !== undefined && readyStr !== undefined) {
+      this.casexStr = `     ${casexStrOrCond}: begin
+            regs.DATA_RD <= ${readSignal};
+            regs.READY <= 1'b1;
+        end\n`
+    } else {
+      this.casexStr = casexStrOrCond
+    }
+  }
+
+  toString (): string {
+    return this.casexStr
+  }
+}
+
 // ... existing code
 // Shared interfaces
 export interface Field {
@@ -74,6 +95,7 @@ interface BaseRegister {
   type: RegisterType
   description?: string
   reset: string
+  resetBinStr?: string
   reserved?: Array<[number, number]>
   weOut?: boolean
   useBuf?: boolean
@@ -84,6 +106,7 @@ export interface Register extends BaseRegister {
   fields: Record<string, Field>
   repeat?: number
   hardUpdate?: number
+  resCount?: number
 }
 
 export interface RegisterConstructor {
@@ -105,8 +128,8 @@ export interface Origination {
   depth: bigint
   type: string
   number: number
-  adr_mask: string
-  en_ptn: string
+  adr_mask?: string
+  en_ptn?: string
 }
 
 export interface OriginationUnfold extends Origination {
